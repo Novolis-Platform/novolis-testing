@@ -1,0 +1,14 @@
+{
+  "packages": {
+    "Novolis.Testing": {
+      "paths": [
+        "src/Novolis.Testing/**",
+        "tests/**",
+        "Directory.Build.props",
+        "Directory.Packages.props",
+        "global.json"
+      ],
+      "project": "src/Novolis.Testing/Novolis.Testing.csproj"
+    }
+  }
+}
