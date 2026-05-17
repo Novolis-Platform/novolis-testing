@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Novolis.Testing.TestServer</PackageId>
+    <Version>0.1.0-preview.1</Version>
+    <Description>In-memory test server helpers</Description>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+  <ItemGroup><FrameworkReference Include="Microsoft.AspNetCore.App" /></ItemGroup>
+</Project>

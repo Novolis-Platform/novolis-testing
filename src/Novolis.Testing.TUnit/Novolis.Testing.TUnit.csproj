@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Novolis.Testing.TUnit</PackageId>
+    <Version>0.1.0-preview.1</Version>
+    <Description>TUnit test output extensions (tables, JSON, C# dump).</Description>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Novolis.Testing.TestBases\Novolis.Testing.TestBases.csproj" />
+    <PackageReference Include="ConsoleTableExt" />
+    <PackageReference Include="Humanizer.Core" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+    <PackageReference Include="TUnit" />
+    <PackageReference Include="VarDump" />
+  </ItemGroup>
+</Project>

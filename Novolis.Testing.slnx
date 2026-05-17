@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Novolis.Testing.TestBases/Novolis.Testing.TestBases.csproj" />
+    <Project Path="src/Novolis.Testing.Logging/Novolis.Testing.Logging.csproj" />
+    <Project Path="src/Novolis.Testing.TUnit/Novolis.Testing.TUnit.csproj" />
+    <Project Path="src/Novolis.Testing.Testcontainers/Novolis.Testing.Testcontainers.csproj" />
+    <Project Path="src/Novolis.Testing.TestServer/Novolis.Testing.TestServer.csproj" />
+  </Folder>
+</Solution>

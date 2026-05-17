@@ -1,14 +1,24 @@
 {
   "packages": {
-    "Novolis.Testing": {
-      "paths": [
-        "src/Novolis.Testing/**",
-        "tests/**",
-        "Directory.Build.props",
-        "Directory.Packages.props",
-        "global.json"
-      ],
-      "project": "src/Novolis.Testing/Novolis.Testing.csproj"
+    "Novolis.Testing.TestBases": {
+      "project": "src/Novolis.Testing.TestBases/Novolis.Testing.TestBases.csproj",
+      "paths": ["src/Novolis.Testing.TestBases/**", "Directory.Build.props", "Directory.Packages.props", "global.json", "Novolis.Testing.slnx"]
+    },
+    "Novolis.Testing.Logging": {
+      "project": "src/Novolis.Testing.Logging/Novolis.Testing.Logging.csproj",
+      "paths": ["src/Novolis.Testing.Logging/**", "Directory.Build.props", "Directory.Packages.props", "global.json", "Novolis.Testing.slnx"]
+    },
+    "Novolis.Testing.TUnit": {
+      "project": "src/Novolis.Testing.TUnit/Novolis.Testing.TUnit.csproj",
+      "paths": ["src/Novolis.Testing.TUnit/**", "Directory.Build.props", "Directory.Packages.props", "global.json", "Novolis.Testing.slnx"]
+    },
+    "Novolis.Testing.Testcontainers": {
+      "project": "src/Novolis.Testing.Testcontainers/Novolis.Testing.Testcontainers.csproj",
+      "paths": ["src/Novolis.Testing.Testcontainers/**", "Directory.Build.props", "Directory.Packages.props", "global.json", "Novolis.Testing.slnx"]
+    },
+    "Novolis.Testing.TestServer": {
+      "project": "src/Novolis.Testing.TestServer/Novolis.Testing.TestServer.csproj",
+      "paths": ["src/Novolis.Testing.TestServer/**", "Directory.Build.props", "Directory.Packages.props", "global.json", "Novolis.Testing.slnx"]
     }
   }
 }
