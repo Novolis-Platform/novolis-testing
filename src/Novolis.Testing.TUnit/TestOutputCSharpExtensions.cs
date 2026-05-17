@@ -1,7 +1,7 @@
 using TUnit.Core;
 using System.ComponentModel;
 
-using Novolis.Testing.TUnit.Dump;
+using Novolis.CodeGen.Reflection.Dump;
 using VarDump.Visitor;
 
 namespace Novolis.Testing.TUnit;
