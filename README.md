@@ -1,21 +1,26 @@
 # Testing
 
-## What it is
+TUnit-first test helpers for Novolis library development.
 
-Testing in the Novolis ecosystem.
+## Packages
 
-## Current status
-
-This repository is reserved for the Novolis Testing package.
-Implementation will be migrated or built in later steps.
+| Package | Purpose |
+|---------|---------|
+| `Novolis.Testing.TUnit` | Test output and assertion helpers |
+| `Novolis.Testing.Logging` | Test logging utilities |
+| `Novolis.Testing.TestBases` | Shared test base types |
+| `Novolis.Testing.Testcontainers` | Testcontainers integration |
+| `Novolis.Testing.TestServer` | In-process test server helpers |
 
 ## Install
 
-Not yet published.
+```bash
+dotnet add package Novolis.Testing.TUnit --version 0.1.0-preview.1
+```
 
-## Quick start
+## Policy
 
-Not yet available.
+TUnit only — no xUnit packages in this repo.
 
 ## Documentation
 
@@ -26,7 +31,3 @@ Not yet available.
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## Security
-
-See [SECURITY.md](SECURITY.md).
