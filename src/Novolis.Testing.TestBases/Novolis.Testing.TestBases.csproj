@@ -1,8 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>Novolis.Testing.TestBases</PackageId>
-    <Version>0.1.0-preview.1</Version>
-    <Description>Test host bases for integration tests (TUnit).</Description>
+<Description>Test host bases for integration tests (TUnit).</Description>
     <IsPackable>true</IsPackable>
   </PropertyGroup>
   <ItemGroup>

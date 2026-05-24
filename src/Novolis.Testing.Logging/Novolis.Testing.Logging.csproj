@@ -1,8 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>Novolis.Testing.Logging</PackageId>
-    <Version>0.1.0-preview.1</Version>
-    <Description>Test logging for TUnit TestContext.</Description>
+<Description>Test logging for TUnit TestContext.</Description>
     <IsPackable>true</IsPackable>
   </PropertyGroup>
   <ItemGroup>

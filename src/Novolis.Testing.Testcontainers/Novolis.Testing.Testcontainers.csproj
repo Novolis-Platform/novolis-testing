@@ -1,8 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>Novolis.Testing.Testcontainers</PackageId>
-    <Version>0.1.0-preview.1</Version>
-    <Description>Testcontainers helpers</Description>
+<Description>Testcontainers helpers</Description>
     <IsPackable>true</IsPackable>
   </PropertyGroup>
   <ItemGroup><PackageReference Include="Testcontainers" /></ItemGroup>

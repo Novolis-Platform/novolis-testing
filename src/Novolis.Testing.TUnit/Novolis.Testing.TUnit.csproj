@@ -1,8 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>Novolis.Testing.TUnit</PackageId>
-    <Version>0.1.0-preview.1</Version>
-    <Description>TUnit test output extensions (tables, JSON, C# dump).</Description>
+<Description>TUnit test output extensions (tables, JSON, C# dump).</Description>
     <IsPackable>true</IsPackable>
   </PropertyGroup>
   <ItemGroup>
