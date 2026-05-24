@@ -16,6 +16,9 @@ public abstract class HostApplicationTestBase
     private bool _initialized;
     private IServiceScope? _scope;
 
+    /// <summary>Creates the test host builder with the given logging defaults.</summary>
+    /// <param name="logLevel">Minimum log level for the test host.</param>
+    /// <param name="loggerProvider">Optional extra logger provider.</param>
     protected HostApplicationTestBase(LogLevel logLevel = LogLevel.Error, ILoggerProvider? loggerProvider = null)
     {
         _hostApplicationBuilder = Host.CreateApplicationBuilder();
@@ -25,13 +28,19 @@ public abstract class HostApplicationTestBase
             _hostApplicationBuilder.Logging.AddProvider(loggerProvider);
     }
 
+    /// <summary>Scoped service provider after <see cref="InitializeAsync"/>.</summary>
     protected IServiceProvider GetServices =>
         _initialized
             ? _scope?.ServiceProvider ?? throw new InvalidOperationException("Host scope missing.")
             : throw new InvalidOperationException("Host not initialized. Ensure test inherits HostApplicationTestBase and TUnit hooks run.");
 
+    /// <summary>Configures the host application builder before the host is built.</summary>
+    /// <param name="builder">Application builder to configure.</param>
+    /// <returns>A task that completes when setup finishes.</returns>
     protected virtual Task SetupAsync(HostApplicationBuilder builder) => Task.CompletedTask;
 
+    /// <summary>Builds and starts the host.</summary>
+    /// <returns>A task that completes when the host has started.</returns>
     public async Task InitializeAsync()
     {
         await SetupAsync(_hostApplicationBuilder);
@@ -41,6 +50,8 @@ public abstract class HostApplicationTestBase
         _initialized = true;
     }
 
+    /// <summary>Stops and disposes the host.</summary>
+    /// <returns>A task that completes when shutdown finishes.</returns>
     public async Task DisposeHostAsync()
     {
         if (_host is null)
@@ -55,9 +66,11 @@ public abstract class HostApplicationTestBase
         _host = null;
     }
 
+    /// <summary>TUnit hook that starts the host before each test.</summary>
     [Before(Test)]
     public Task TUnitSetUp() => InitializeAsync();
 
+    /// <summary>TUnit hook that disposes the host after each test.</summary>
     [After(Test)]
     public Task TUnitTearDown() => DisposeHostAsync();
 }

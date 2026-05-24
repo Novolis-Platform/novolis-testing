@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace Novolis.Testing.TUnit;
 
+/// <summary>JSON serialization helpers for TUnit test output.</summary>
 public static class TestOutputJsonExtensions
 {
     /// <summary>

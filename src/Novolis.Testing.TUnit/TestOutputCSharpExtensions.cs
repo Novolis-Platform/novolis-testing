@@ -6,13 +6,14 @@ using VarDump.Visitor;
 
 namespace Novolis.Testing.TUnit;
 
+/// <summary>Writes C# object initializers to TUnit test output.</summary>
 public static class TestOutputCSharpExtensions
 {
     /// <summary>
     /// Writes the provided source object as C# code to the test output.
     /// </summary>
     /// <remarks>
-    /// The C# code is written using the <see cref="CSharpDumper"/>
+    /// The C# code is written using <see cref="DumpExtensions.DumpClass"/>
     /// </remarks>
     /// <example>
     /// <code>

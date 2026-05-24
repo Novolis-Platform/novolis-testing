@@ -22,11 +22,10 @@ public class WebApplicationTestBase : IAsyncDisposable
     private IServiceScope? _scope;
 
     /// <summary>
-    /// Creates a new instance of <see cref="WebApplicationTestBase"/> with the specified logger provider and log level
+    /// Creates a new instance of <see cref="WebApplicationTestBase"/> with the specified logger provider and log level.
     /// </summary>
-    /// <param name="outputHelper"></param>
-    /// <param name="logLevel"></param>
-    /// <param name="loggerProvider"></param>
+    /// <param name="logLevel">Minimum log level for the test host.</param>
+    /// <param name="loggerProvider">Optional extra logger provider.</param>
     protected WebApplicationTestBase(LogLevel logLevel = LogLevel.Error, ILoggerProvider? loggerProvider = null)
     {
         _hostApplicationBuilder = WebApplication.CreateBuilder();
@@ -78,6 +77,7 @@ public class WebApplicationTestBase : IAsyncDisposable
     /// </summary>
     protected IEnumerable<string> GetEndpointRoutes => GetEndpoints.Select(e => e).Cast<RouteEndpoint>().Select(e => e.RoutePattern.RawText)!;
     
+    /// <summary>Builds and starts the web application on a random local port.</summary>
     public async Task InitializeAsync()
     {
         await SetupAsync(_hostApplicationBuilder);
@@ -91,7 +91,7 @@ public class WebApplicationTestBase : IAsyncDisposable
         _scope = _application.Services.CreateScope();
         _initialized = true;
     }
-
+    /// <summary>Stops the application and releases resources.</summary>
     public async ValueTask DisposeAsync()
     {
         await _cancellationTokenSource.CancelAsync();
@@ -99,6 +99,7 @@ public class WebApplicationTestBase : IAsyncDisposable
         await _application.WaitForShutdownAsync();
     }
     
+    /// <summary>Starts the web application if not already running.</summary>
     public async Task StartAsync()
     {
         if (_application == null)
@@ -108,6 +109,7 @@ public class WebApplicationTestBase : IAsyncDisposable
         await _application.StartAsync(_cancellationTokenSource.Token);
     }
     
+    /// <summary>Stops the web application.</summary>
     public async Task StopAsync()
     {
         if (_application == null)

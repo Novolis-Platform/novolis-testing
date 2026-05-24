@@ -5,6 +5,8 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Novolis.Testing.Testcontainers;
 
+/// <summary>Runs a Testcontainers instance with logging and lifetime control.</summary>
+/// <typeparam name="T">Container type implementing <see cref="IContainer"/>.</typeparam>
 public class ContainerRunner<T> : ITestcontainerRunner where T : class, IContainer
 {
     private readonly ILogger<T> _logger;
@@ -22,6 +24,7 @@ public class ContainerRunner<T> : ITestcontainerRunner where T : class, IContain
         _timeout = timeout;
     }
 
+    /// <inheritdoc />
     public async Task StartAsync()
     {
         _cancellationTokenSource = new CancellationTokenSource(_timeout);
@@ -29,12 +32,14 @@ public class ContainerRunner<T> : ITestcontainerRunner where T : class, IContain
         await _container.StartAsync(_cancellationTokenSource.Token);
     }
     
+    /// <inheritdoc />
     public async Task StopAsync()
     {
         await _container.StopAsync(_cancellationToken);
         await DisposeAsync();
     }
 
+    /// <inheritdoc />
     public TestcontainersStates GetState() => _container.State;
 
     /// <inheritdoc />
@@ -43,6 +48,7 @@ public class ContainerRunner<T> : ITestcontainerRunner where T : class, IContain
         await _container.ExecAsync(new[] { command }, _cancellationToken);
     }
 
+    /// <inheritdoc />
     public async Task ExecuteAsync(Func<Task> actionAsync)
     {
         try

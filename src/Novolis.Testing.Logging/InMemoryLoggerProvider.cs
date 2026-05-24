@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace Novolis.Testing.Logging;
 
+/// <summary>Provides <see cref="InMemoryLogger"/> instances per category.</summary>
 public class InMemoryLoggerProvider(IOptions<LoggerFilterOptions> options) : ILoggerProvider
 {
     private readonly ConcurrentDictionary<string, InMemoryLogger> _loggers = new();

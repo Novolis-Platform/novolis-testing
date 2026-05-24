@@ -3,6 +3,7 @@ using System.Text.Json;
 
 namespace Novolis.Testing.TUnit;
 
+/// <summary>General TUnit test output helpers.</summary>
 public static class TestOutputExtensions
 {
     /// <summary>

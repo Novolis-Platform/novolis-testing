@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Novolis.Testing.Logging;
 
+/// <summary>Captured log entry for in-memory test loggers.</summary>
 public class InMemoryLogEntry
 {
     /// <summary>

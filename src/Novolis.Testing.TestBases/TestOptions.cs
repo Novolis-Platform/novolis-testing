@@ -1,5 +1,6 @@
 namespace Novolis.Testing.TestBases;
 
+/// <summary>Options controlling test host startup behavior.</summary>
 public class TestOptions
 {
     /// <summary>

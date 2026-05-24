@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 
 namespace Novolis.Testing.Logging;
 
+/// <summary>Factory helpers for TUnit test loggers.</summary>
 public static class TestOutputHelperExtensions
 {
     /// <summary>
@@ -15,13 +16,11 @@ public static class TestOutputHelperExtensions
     public static ILogger<T> CreateTestLogger<T>(this TestContext? outputHelper, LogLevel logLevel = LogLevel.Debug)
         => new SimpleTestLogger<T>(outputHelper, logLevel);
 
-    /// <summary>
-    /// Creates a test logger instance with the specified log category name.
-    /// </summary>
-    /// <typeparam name="T">The type of the class to which the created logger will be associated.</typeparam>
-    /// <param name="outputHelper">The ITestOutputHelper instance used for logging.</param>
-    /// <param name="logLevel">The log level to be used for the logger (default: LogLevel.Debug).</param>
-    /// <returns>An instance of <see cref="ILogger{T}"/> that can be used for logging tests.</returns>
+    /// <summary>Creates a non-generic test logger with a custom category name.</summary>
+    /// <param name="outputHelper">TUnit test context for output.</param>
+    /// <param name="logLevel">Minimum log level.</param>
+    /// <param name="categoryName">Logger category name.</param>
+    /// <returns>Logger writing to test output.</returns>
     public static ILogger CreateTestLogger(this TestContext outputHelper, LogLevel logLevel = LogLevel.Debug, string categoryName = "Test")
         => new SimpleTestLogger(outputHelper, logLevel, categoryName);
 
