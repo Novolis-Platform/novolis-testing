@@ -14,5 +14,6 @@
     <PackageVersion Include="Testcontainers" Version="4.3.0" />
     <PackageVersion Include="TUnit" Version="1.44.39" />
     <PackageVersion Include="VarDump" Version="1.0.5.17" />
+      <PackageVersion Include="Novolis.CodeGen.Reflection.Dump" Version="*" />
   </ItemGroup>
 </Project>

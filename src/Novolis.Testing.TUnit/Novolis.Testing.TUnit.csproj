@@ -5,8 +5,9 @@
     <IsPackable>true</IsPackable>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Novolis.CodeGen.Reflection.Dump" />
     <ProjectReference Include="..\Novolis.Testing.TestBases\Novolis.Testing.TestBases.csproj" />
-    <ProjectReference Include="..\..\..\novolis-codegen\src\Novolis.CodeGen.Reflection.Dump\Novolis.CodeGen.Reflection.Dump.csproj" />
+    
     <PackageReference Include="ConsoleTableExt" />
     <PackageReference Include="Humanizer.Core" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
