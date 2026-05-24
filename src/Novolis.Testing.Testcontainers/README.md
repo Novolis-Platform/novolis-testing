@@ -1,6 +1,6 @@
 # Novolis.Testing.Testcontainers
 
-Testcontainers runner for integration tests.
+Opinionated Testcontainers runner with lifetime limits for integration tests.
 
 ## Install
 
@@ -8,13 +8,33 @@ Testcontainers runner for integration tests.
 dotnet add package Novolis.Testing.Testcontainers
 ```
 
-**Prerequisites:** [.NET 10 SDK](https://dotnet.microsoft.com/download) (`net10.0`).
+**Prerequisites:** [.NET 10 SDK](https://dotnet.microsoft.com/download) (`net10.0`), Docker.
 
 ## Quick start
 
 ```csharp
-// See docs/getting-started.md for integration examples.
+using DotNet.Testcontainers.Containers;
+using DotNet.Testcontainers.Builders;
+using Novolis.Testing.Testcontainers;
+
+ITestcontainerRunner runner = new TestContainerRunnerBuilder<PostgreSqlContainer>()
+    .WithContainerFactory(() => new PostgreSqlBuilder().Build())
+    .WithMaxLifetime(TimeSpan.FromMinutes(5))
+    .Build();
+
+await runner.StartAsync();
+await runner.ExecuteCommandAsync("pg_isready");
+await runner.StopAsync();
 ```
+
+Pair with `Novolis.Testing.TestBases` for TUnit fixture wiring.
+
+## Related packages
+
+| Package | When to use |
+|---------|-------------|
+| `Novolis.Testing.TestBases` | Host + client setup |
+| `Novolis.Testing.Logging` | Log container diagnostics |
 
 ## More documentation
 
@@ -23,4 +43,4 @@ dotnet add package Novolis.Testing.Testcontainers
 
 ## Support
 
-Pre-release. APIs may change between releases.
+Pre-release (`2026.1.*` on GitHub Packages).

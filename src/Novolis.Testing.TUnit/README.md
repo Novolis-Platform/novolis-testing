@@ -1,6 +1,6 @@
 # Novolis.Testing.TUnit
 
-TUnit output formatting extensions.
+TUnit test output helpers: JSON dumps, tables, and C# literal formatting.
 
 ## Install
 
@@ -8,13 +8,29 @@ TUnit output formatting extensions.
 dotnet add package Novolis.Testing.TUnit
 ```
 
-**Prerequisites:** [.NET 10 SDK](https://dotnet.microsoft.com/download) (`net10.0`).
+**Prerequisites:** [.NET 10 SDK](https://dotnet.microsoft.com/download) (`net10.0`), [TUnit](https://www.nuget.org/packages/TUnit).
 
 ## Quick start
 
 ```csharp
-// See docs/getting-started.md for integration examples.
+using Novolis.Testing.TUnit;
+using TUnit.Core;
+
+TestContext? output = TestContext.Current;
+output.WriteLine("plain text");
+output.WriteJson(new { Id = 1, Name = "alpha" });
+
+var opts = output.GetDefaultJsonSerializerOptions();
 ```
+
+Depends on `Novolis.CodeGen.Reflection.Dump` for rich object formatting.
+
+## Related packages
+
+| Package | When to use |
+|---------|-------------|
+| `Novolis.Testing.Logging` | Capture `ILogger` output in tests |
+| `Novolis.Testing.TestBases` | ASP.NET Core / host bootstrapping |
 
 ## More documentation
 
@@ -23,4 +39,4 @@ dotnet add package Novolis.Testing.TUnit
 
 ## Support
 
-Pre-release. APIs may change between releases.
+Pre-release (`2026.1.*` on GitHub Packages).

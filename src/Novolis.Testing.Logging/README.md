@@ -1,6 +1,6 @@
 # Novolis.Testing.Logging
 
-In-memory and TUnit test logging helpers.
+In-memory and TUnit-friendly logging providers for tests.
 
 ## Install
 
@@ -13,8 +13,27 @@ dotnet add package Novolis.Testing.Logging
 ## Quick start
 
 ```csharp
-// See docs/getting-started.md for integration examples.
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Novolis.Testing.Logging;
+
+builder.Logging.AddInMemoryLoggingProvider(LogLevel.Debug);
+
+var logger = services.GetRequiredService<ILogger<MyService>>();
+logger.LogInformation("captured");
+
+var mem = (InMemoryLogger)services.GetRequiredService<ILogger<MyService>>();
+IReadOnlyList<InMemoryLogEntry> entries = mem.GetLogEntries();
 ```
+
+Use `AddSimpleTestLogger` to mirror logs into TUnit `TestContext` output.
+
+## Related packages
+
+| Package | When to use |
+|---------|-------------|
+| `Novolis.Testing.TUnit` | JSON/table dump helpers for assertions |
+| `Novolis.Testing.TestBases` | Web and generic host test bases |
 
 ## More documentation
 
@@ -23,4 +42,4 @@ dotnet add package Novolis.Testing.Logging
 
 ## Support
 
-Pre-release. APIs may change between releases.
+Pre-release (`2026.1.*` on GitHub Packages).

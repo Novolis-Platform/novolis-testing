@@ -1,6 +1,6 @@
 # Novolis.Testing.TestBases
 
-Web and generic host test bases for TUnit.
+Reusable TUnit bases for `WebApplication` and generic `IHost` integration tests.
 
 ## Install
 
@@ -13,8 +13,34 @@ dotnet add package Novolis.Testing.TestBases
 ## Quick start
 
 ```csharp
-// See docs/getting-started.md for integration examples.
+using Novolis.Testing.TestBases;
+
+public sealed class HealthTests : WebApplicationTestBase
+{
+    protected override Task SetupAsync(WebApplicationBuilder builder)
+    {
+        builder.Services.AddControllers();
+        return Task.CompletedTask;
+    }
+
+    [Test]
+    public async Task Health_returns_ok()
+    {
+        await InitializeAsync();
+        var response = await GetTestClient.GetAsync("/health");
+        await Assert.That(response.IsSuccessStatusCode).IsTrue();
+    }
+}
 ```
+
+For non-HTTP hosts, inherit `HostApplicationTestBase` instead.
+
+## Related packages
+
+| Package | When to use |
+|---------|-------------|
+| `Novolis.Testing.TestServer` | Lightweight Kestrel stub routes |
+| `Novolis.Testing.Logging` | In-memory log capture |
 
 ## More documentation
 
@@ -23,4 +49,4 @@ dotnet add package Novolis.Testing.TestBases
 
 ## Support
 
-Pre-release. APIs may change between releases.
+Pre-release (`2026.1.*` on GitHub Packages).

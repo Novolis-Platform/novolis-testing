@@ -1,6 +1,6 @@
 # Novolis.Testing.TestServer
 
-Kestrel test host helpers.
+Fluent Kestrel test host builder for in-process HTTP integration tests.
 
 ## Install
 
@@ -13,8 +13,30 @@ dotnet add package Novolis.Testing.TestServer
 ## Quick start
 
 ```csharp
-// See docs/getting-started.md for integration examples.
+using Novolis.Testing.TestServer;
+
+await TestApiHost.Create()
+    .With(HttpMethod.Get, "/ping", ctx =>
+    {
+        ctx.Response.StatusCode = 200;
+        return Task.CompletedTask;
+    })
+    .Build(new Uri("http://127.0.0.1:0"))
+    .ExecuteAsync(async client =>
+    {
+        var body = await client.GetStringAsync("/ping");
+        await Assert.That(body).IsEqualTo("ok");
+    });
 ```
+
+Use when you need a minimal API surface without a full `WebApplication` project.
+
+## Related packages
+
+| Package | When to use |
+|---------|-------------|
+| `Novolis.Testing.TestBases` | TUnit lifecycle around `WebApplicationFactory`-style setup |
+| `Novolis.Testing.Testcontainers` | Real databases and brokers in Docker |
 
 ## More documentation
 
@@ -23,4 +45,4 @@ dotnet add package Novolis.Testing.TestServer
 
 ## Support
 
-Pre-release. APIs may change between releases.
+Pre-release (`2026.1.*` on GitHub Packages).
