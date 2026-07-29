@@ -1,8 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>Novolis.Testing.TUnit</PackageId>
-<Description>TUnit test output extensions (tables, JSON, C# dump).</Description>
+    <Description>TUnit test output extensions (tables, JSON, C# dump).</Description>
     <IsPackable>true</IsPackable>
+    <OutputType>Library</OutputType>
+    <IsTestProject>false</IsTestProject>
+    <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Novolis.CodeGen.Reflection.Dump" />
