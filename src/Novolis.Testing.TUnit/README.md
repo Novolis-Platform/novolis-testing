@@ -1,3 +1,11 @@
+<!-- novolis-pkg-brand:start -->
+<p align="center">
+  <a href="https://github.com/Novolis-Platform/novolis-testing">
+    <img src="https://raw.githubusercontent.com/Novolis-Platform/.github/main/brand/logo-icon.svg" width="72" alt="Novolis"/>
+  </a>
+</p>
+<!-- novolis-pkg-brand:end -->
+
 # Novolis.Testing.TUnit
 
 TUnit test output helpers: JSON dumps, tables, and C# literal formatting.
@@ -40,3 +48,4 @@ Depends on `Novolis.CodeGen.Reflection.Dump` for rich object formatting.
 ## Support
 
 Pre-release (`2026.1.*` on GitHub Packages).
+

@@ -1,3 +1,11 @@
+<!-- novolis-pkg-brand:start -->
+<p align="center">
+  <a href="https://github.com/Novolis-Platform/novolis-testing">
+    <img src="https://raw.githubusercontent.com/Novolis-Platform/.github/main/brand/logo-icon.svg" width="72" alt="Novolis"/>
+  </a>
+</p>
+<!-- novolis-pkg-brand:end -->
+
 # Novolis.Testing.Logging
 
 In-memory and TUnit-friendly logging providers for tests.
@@ -43,3 +51,4 @@ Use `AddSimpleTestLogger` to mirror logs into TUnit `TestContext` output.
 ## Support
 
 Pre-release (`2026.1.*` on GitHub Packages).
+

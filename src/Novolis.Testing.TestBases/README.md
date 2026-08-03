@@ -1,3 +1,11 @@
+<!-- novolis-pkg-brand:start -->
+<p align="center">
+  <a href="https://github.com/Novolis-Platform/novolis-testing">
+    <img src="https://raw.githubusercontent.com/Novolis-Platform/.github/main/brand/logo-icon.svg" width="72" alt="Novolis"/>
+  </a>
+</p>
+<!-- novolis-pkg-brand:end -->
+
 # Novolis.Testing.TestBases
 
 Reusable TUnit bases for `WebApplication` and generic `IHost` integration tests.
@@ -50,3 +58,4 @@ For non-HTTP hosts, inherit `HostApplicationTestBase` instead.
 ## Support
 
 Pre-release (`2026.1.*` on GitHub Packages).
+

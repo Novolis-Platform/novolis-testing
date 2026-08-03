@@ -1,3 +1,11 @@
+<!-- novolis-pkg-brand:start -->
+<p align="center">
+  <a href="https://github.com/Novolis-Platform/novolis-testing">
+    <img src="https://raw.githubusercontent.com/Novolis-Platform/.github/main/brand/logo-icon.svg" width="72" alt="Novolis"/>
+  </a>
+</p>
+<!-- novolis-pkg-brand:end -->
+
 # Novolis.Testing.TestServer
 
 Fluent Kestrel test host builder for in-process HTTP integration tests.
@@ -46,3 +54,4 @@ Use when you need a minimal API surface without a full `WebApplication` project.
 ## Support
 
 Pre-release (`2026.1.*` on GitHub Packages).
+

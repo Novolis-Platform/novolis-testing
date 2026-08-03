@@ -1,3 +1,11 @@
+<!-- novolis-pkg-brand:start -->
+<p align="center">
+  <a href="https://github.com/Novolis-Platform/novolis-testing">
+    <img src="https://raw.githubusercontent.com/Novolis-Platform/.github/main/brand/logo-icon.svg" width="72" alt="Novolis"/>
+  </a>
+</p>
+<!-- novolis-pkg-brand:end -->
+
 # Novolis.Testing.Testcontainers
 
 Opinionated Testcontainers runner with lifetime limits for integration tests.
@@ -44,3 +52,4 @@ Pair with `Novolis.Testing.TestBases` for TUnit fixture wiring.
 ## Support
 
 Pre-release (`2026.1.*` on GitHub Packages).
+
