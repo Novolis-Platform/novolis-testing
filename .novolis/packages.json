@@ -19,6 +19,10 @@
     "Novolis.Testing.TestServer": {
       "project": "src/Novolis.Testing.TestServer/Novolis.Testing.TestServer.csproj",
       "paths": ["src/Novolis.Testing.TestServer/**", "Directory.Build.props", "Directory.Packages.props", "global.json", "Novolis.Testing.slnx"]
+    },
+    "Novolis.Testing.ServiceBus": {
+      "project": "src/Novolis.Testing.ServiceBus/Novolis.Testing.ServiceBus.csproj",
+      "paths": ["src/Novolis.Testing.ServiceBus/**", "Directory.Build.props", "Directory.Packages.props", "global.json", "Novolis.Testing.slnx"]
     }
   }
 }

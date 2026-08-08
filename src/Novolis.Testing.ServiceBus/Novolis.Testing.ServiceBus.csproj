@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Novolis.Testing.ServiceBus</PackageId>
+    <Description>TUnit Service Bus test host over AlmostServiceBus (Novolis Client + Broker.Almost).</Description>
+    <IsPackable>true</IsPackable>
+    <OutputType>Library</OutputType>
+    <IsTestProject>false</IsTestProject>
+    <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
+    <RootNamespace>Novolis.Testing.ServiceBus</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="AlmostServiceBus.TestHost" />
+    <PackageReference Include="Novolis.Messaging.ServiceBus.Abstractions" />
+    <PackageReference Include="Novolis.Messaging.ServiceBus.Broker.Almost" />
+    <PackageReference Include="Novolis.Messaging.ServiceBus.Client" />
+    <PackageReference Include="TUnit" />
+  </ItemGroup>
+</Project>

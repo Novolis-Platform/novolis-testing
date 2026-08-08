@@ -17,5 +17,9 @@
     <PackageVersion Include="TUnit" Version="1.44.39" />
     <PackageVersion Include="VarDump" Version="1.0.5.17" />
     <PackageVersion Include="Novolis.CodeGen.Reflection.Dump" Version="2026.1.*" />
+    <PackageVersion Include="AlmostServiceBus.TestHost" Version="0.3.1" />
+    <PackageVersion Include="Novolis.Messaging.ServiceBus.Abstractions" Version="2026.1.*" />
+    <PackageVersion Include="Novolis.Messaging.ServiceBus.Broker.Almost" Version="2026.1.*" />
+    <PackageVersion Include="Novolis.Messaging.ServiceBus.Client" Version="2026.1.*" />
   </ItemGroup>
 </Project>

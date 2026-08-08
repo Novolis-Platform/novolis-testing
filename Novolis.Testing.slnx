@@ -5,6 +5,7 @@
     <Project Path="src/Novolis.Testing.TUnit/Novolis.Testing.TUnit.csproj" />
     <Project Path="src/Novolis.Testing.Testcontainers/Novolis.Testing.Testcontainers.csproj" />
     <Project Path="src/Novolis.Testing.TestServer/Novolis.Testing.TestServer.csproj" />
+    <Project Path="src/Novolis.Testing.ServiceBus/Novolis.Testing.ServiceBus.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Novolis.Testing.Unit/Novolis.Testing.Unit.csproj" />

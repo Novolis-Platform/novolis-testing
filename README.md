@@ -43,6 +43,7 @@
 | `Novolis.Testing.Testcontainers` | `dotnet add package Novolis.Testing.Testcontainers` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.Testcontainers/README.md) |
 | `Novolis.Testing.TestServer` | `dotnet add package Novolis.Testing.TestServer` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.TestServer/README.md) |
 | `Novolis.Testing.TUnit` | `dotnet add package Novolis.Testing.TUnit` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.TUnit/README.md) |
+| `Novolis.Testing.ServiceBus` | `dotnet add package Novolis.Testing.ServiceBus` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.ServiceBus/README.md) |
 
 For NuGet.org and Visual Studio, the **embedded** README.md inside each package is authoritative.
 
@@ -60,6 +61,7 @@ TUnit-first test helpers for Novolis library development.
 | `Novolis.Testing.TestBases` | Shared test base types |
 | `Novolis.Testing.Testcontainers` | Testcontainers integration |
 | `Novolis.Testing.TestServer` | In-process test server helpers |
+| `Novolis.Testing.ServiceBus` | AlmostServiceBus TUnit host (Novolis Service Bus Client) |
 
 ## Install
 
