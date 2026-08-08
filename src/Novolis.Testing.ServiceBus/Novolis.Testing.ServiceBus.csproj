@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="AlmostServiceBus.TestHost" />
+    <PackageReference Include="Azure.Messaging.ServiceBus" />
     <PackageReference Include="Novolis.Messaging.ServiceBus.Abstractions" />
     <PackageReference Include="Novolis.Messaging.ServiceBus.Broker.Almost" />
     <PackageReference Include="Novolis.Messaging.ServiceBus.Client" />

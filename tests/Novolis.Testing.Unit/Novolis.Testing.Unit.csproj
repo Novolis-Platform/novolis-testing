@@ -11,8 +11,14 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Novolis.Testing.Logging\Novolis.Testing.Logging.csproj" />
+    <ProjectReference Include="..\..\src\Novolis.Testing.ServiceBus\Novolis.Testing.ServiceBus.csproj" />
     <ProjectReference Include="..\..\src\Novolis.Testing.TestBases\Novolis.Testing.TestBases.csproj" />
     <ProjectReference Include="..\..\src\Novolis.Testing.TestServer\Novolis.Testing.TestServer.csproj" />
     <ProjectReference Include="..\..\src\Novolis.Testing.TUnit\Novolis.Testing.TUnit.csproj" />
+    <ProjectReference Include="..\..\src\Novolis.Testing.Coverage\Novolis.Testing.Coverage.csproj" />
+    <PackageReference Include="Novolis.Messaging.ServiceBus.Abstractions" />
+    <PackageReference Include="Novolis.Messaging.ServiceBus.Client" />
+    <PackageReference Include="Novolis.Messaging.ServiceBus.Primitives" />
+    <PackageReference Include="Azure.Messaging.ServiceBus" />
   </ItemGroup>
 </Project>

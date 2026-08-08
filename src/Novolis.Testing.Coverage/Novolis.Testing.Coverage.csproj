@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Novolis.Testing.Coverage</PackageId>
+    <Description>Test helpers for coverage-closing work: public API surface probes for smoke tests. Cobertura collect/analyze/gate lives in Novolis.Tools.Coverage.</Description>
+    <IsPackable>true</IsPackable>
+    <OutputType>Library</OutputType>
+    <IsTestProject>false</IsTestProject>
+    <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
+    <RootNamespace>Novolis.Testing.Coverage</RootNamespace>
+    <PackageTags>novolis;testing;coverage;public-api</PackageTags>
+  </PropertyGroup>
+</Project>
