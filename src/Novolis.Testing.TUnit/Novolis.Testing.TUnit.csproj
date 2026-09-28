@@ -8,7 +8,7 @@
     <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Novolis.CodeGen.Reflection.Dump" />
+    <LibraryReference Include="Novolis.CodeGen.Reflection.Dump" />
     <ProjectReference Include="..\Novolis.Testing.TestBases\Novolis.Testing.TestBases.csproj" />
     
     <PackageReference Include="ConsoleTableExt" />

@@ -11,9 +11,9 @@
   <ItemGroup>
     <PackageReference Include="AlmostServiceBus.TestHost" />
     <PackageReference Include="Azure.Messaging.ServiceBus" />
-    <PackageReference Include="Novolis.Messaging.ServiceBus.Abstractions" />
-    <PackageReference Include="Novolis.Messaging.ServiceBus.Broker.Almost" />
-    <PackageReference Include="Novolis.Messaging.ServiceBus.Client" />
+    <LibraryReference Include="Novolis.Messaging.ServiceBus.Abstractions" />
+    <LibraryReference Include="Novolis.Messaging.ServiceBus.Broker.Almost" />
+    <LibraryReference Include="Novolis.Messaging.ServiceBus.Client" />
     <PackageReference Include="TUnit" />
   </ItemGroup>
 </Project>
