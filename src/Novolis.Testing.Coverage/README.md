@@ -12,7 +12,7 @@ CLIs (`novolis-coverage`) are thin orchestrators of that library.
 dotnet add package Novolis.Testing.Coverage --version 2026.1.*
 ```
 
-## Public API smoke
+## Quick start
 
 ```csharp
 using Novolis.Testing.Coverage;
