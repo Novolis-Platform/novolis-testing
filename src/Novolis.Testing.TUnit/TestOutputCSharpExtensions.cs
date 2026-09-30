@@ -58,7 +58,7 @@ public static class TestOutputCSharpExtensions
         IgnoreNullValues = true,
         DateKind = DateKind.ConvertToUtc,
         DateTimeInstantiation = DateTimeInstantiation.Parse,
-        UseTypeFullName = true,
+        TypeNamePolicy = TypeNamingPolicy.FullName,
         GenerateVariableInitializer = true,
         SortDirection = ListSortDirection.Ascending,
         MaxDepth = 64,
