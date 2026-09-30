@@ -14,6 +14,9 @@ public sealed class WindowsAppiumSessionOptions
     /// <summary>Executable path or packaged application identifier.</summary>
     public required string App { get; init; }
 
+    /// <summary>Optional command-line arguments passed to the launched executable.</summary>
+    public string? AppArguments { get; init; }
+
     /// <summary>Device name capability. Defaults to <c>WindowsPC</c>.</summary>
     public string DeviceName { get; init; } = "WindowsPC";
 
@@ -36,12 +39,15 @@ public sealed class WindowsAppiumSessionOptions
         if (string.IsNullOrWhiteSpace(App))
             throw new InvalidOperationException("Windows Appium sessions require an executable path or packaged app id.");
 
-        return new AppiumOptions
+        var options = new AppiumOptions
         {
             AutomationName = AutomationName,
             PlatformName = MobilePlatform.Windows,
             DeviceName = DeviceName,
             App = App,
         };
+        if (!string.IsNullOrWhiteSpace(AppArguments))
+            options.AddAdditionalAppiumOption("appArguments", AppArguments);
+        return options;
     }
 }

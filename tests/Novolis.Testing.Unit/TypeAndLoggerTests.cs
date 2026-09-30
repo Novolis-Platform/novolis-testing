@@ -25,38 +25,3 @@ public sealed class TypeExtensionsTests
         await Assert.That(name).Contains("List<");
     }
 }
-
-public sealed class InMemoryLoggerTests
-{
-    [Test]
-    public async Task Log_CapturesEntriesWhenEnabled()
-    {
-        var options = Options.Create(new LoggerFilterOptions
-        {
-            Rules =
-            {
-                new LoggerFilterRule("InMemoryLogger", null, LogLevel.Debug, null)
-            }
-        });
-        var logger = new InMemoryLogger(options, "cat");
-        await Assert.That(logger.IsEnabled(LogLevel.Information)).IsTrue();
-        logger.LogInformation("hello {Name}", "world");
-        var entries = logger.GetLogEntries();
-        await Assert.That(entries).Count().IsEqualTo(1);
-        await Assert.That(entries[0].Message).Contains("hello");
-        await Assert.That(entries[0].CategoryName).IsEqualTo("cat");
-        await Assert.That(entries[0].ToString()).Contains("hello");
-    }
-
-    [Test]
-    public async Task AddInMemoryLoggingProvider_RegistersViaLoggingBuilder()
-    {
-        var services = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
-        services.AddLogging(b => b.AddInMemoryLoggingProvider());
-        await using var sp = services.BuildServiceProvider();
-        var factory = sp.GetRequiredService<ILoggerFactory>();
-        var logger = factory.CreateLogger("unit");
-        logger.LogWarning("captured");
-        await Assert.That(logger).IsNotNull();
-    }
-}

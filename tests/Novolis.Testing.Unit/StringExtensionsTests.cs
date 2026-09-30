@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -13,4 +13,13 @@ using Novolis.Testing.TestServer;
 
 namespace Novolis.Testing.Unit;
 
-internal sealed record Marker(string Value);
+public sealed class StringExtensionsTests
+{
+    [Test]
+    public async Task FirstToken_and_LastToken_split_on_char()
+    {
+        await Assert.That("a.b.c".FirstToken('.')).IsEqualTo("a");
+        await Assert.That("a.b.c".LastToken('.')).IsEqualTo("c");
+        await Assert.That("single".LastToken('.')).IsEqualTo("single");
+    }
+}
