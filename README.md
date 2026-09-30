@@ -35,22 +35,25 @@
 <!-- novolis-marketing:end -->
 <!-- novolis-package-index:start -->
 > **GitHub Packages shows this repository README on every package page** (upstream limitation).
-> Open the **package README** for install and quick start — embedded in each .nupkg and linked below.
+> Open the **package README** for install and quick start — embedded in each `.nupkg` and linked below.
 
 ## Published packages
 
 | Package | Install | Package README |
 |---------|---------|----------------|
+| `Novolis.Testing.Appium` | `dotnet add package Novolis.Testing.Appium` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.Appium/README.md) |
+| `Novolis.Testing.Coverage` | `dotnet add package Novolis.Testing.Coverage` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.Coverage/README.md) |
 | `Novolis.Testing.Logging` | `dotnet add package Novolis.Testing.Logging` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.Logging/README.md) |
+| `Novolis.Testing.ServiceBus` | `dotnet add package Novolis.Testing.ServiceBus` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.ServiceBus/README.md) |
 | `Novolis.Testing.TestBases` | `dotnet add package Novolis.Testing.TestBases` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.TestBases/README.md) |
 | `Novolis.Testing.Testcontainers` | `dotnet add package Novolis.Testing.Testcontainers` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.Testcontainers/README.md) |
 | `Novolis.Testing.TestServer` | `dotnet add package Novolis.Testing.TestServer` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.TestServer/README.md) |
 | `Novolis.Testing.TUnit` | `dotnet add package Novolis.Testing.TUnit` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.TUnit/README.md) |
-| `Novolis.Testing.ServiceBus` | `dotnet add package Novolis.Testing.ServiceBus` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.ServiceBus/README.md) |
 
-For NuGet.org and Visual Studio, the **embedded** README.md inside each package is authoritative.
+For NuGet.org and Visual Studio, the **embedded** `README.md` inside each package is authoritative.
 
 <!-- novolis-package-index:end -->
+
 # Testing
 
 TUnit-first test helpers for Novolis library development.
@@ -65,6 +68,7 @@ TUnit-first test helpers for Novolis library development.
 | `Novolis.Testing.Testcontainers` | Testcontainers integration |
 | `Novolis.Testing.TestServer` | In-process test server helpers |
 | `Novolis.Testing.ServiceBus` | AlmostServiceBus TUnit host (Novolis Service Bus Client) |
+| `Novolis.Testing.Appium` | TUnit Appium sessions for Android and Windows MAUI hosts |
 
 ## Install
 
@@ -85,4 +89,3 @@ TUnit only — no xUnit packages in this repo.
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
-

@@ -16,6 +16,7 @@ Published docs: [https://novolis-platform.github.io/.github/novolis-testing/](ht
 
 | Package |
 | --- |
+| `Novolis.Testing.Appium` |
 | `Novolis.Testing.Coverage` |
 | `Novolis.Testing.Logging` |
 | `Novolis.Testing.ServiceBus` |

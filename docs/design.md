@@ -22,6 +22,7 @@ Follow [library-boundaries](https://github.com/Novolis-Platform/novolis-governan
 
 ## Packages
 
+- `Novolis.Testing.Appium`
 - `Novolis.Testing.Coverage`
 - `Novolis.Testing.Logging`
 - `Novolis.Testing.ServiceBus`

@@ -18,6 +18,7 @@
     <PackageVersion Include="TUnit" Version="1.44.39" />
     <PackageVersion Include="VarDump" Version="1.0.5.17" />
     <PackageVersion Include="Novolis.CodeGen.Reflection.Dump" Version="2026.1.*" />
+    <PackageVersion Include="Appium.WebDriver" Version="9.0.0" />
     <PackageVersion Include="AlmostServiceBus.TestHost" Version="0.3.1" />
     <PackageVersion Include="Azure.Messaging.ServiceBus" Version="7.20.1" />
     <PackageVersion Include="Novolis.Messaging.ServiceBus.Abstractions" Version="2026.1.*" />
