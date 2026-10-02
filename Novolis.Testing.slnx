@@ -3,6 +3,7 @@
     <Project Path="src/Novolis.Testing.TestBases/Novolis.Testing.TestBases.csproj" />
     <Project Path="src/Novolis.Testing.Logging/Novolis.Testing.Logging.csproj" />
     <Project Path="src/Novolis.Testing.TUnit/Novolis.Testing.TUnit.csproj" />
+    <Project Path="src/Novolis.Testing.Budgets/Novolis.Testing.Budgets.csproj" />
     <Project Path="src/Novolis.Testing.Testcontainers/Novolis.Testing.Testcontainers.csproj" />
     <Project Path="src/Novolis.Testing.TestServer/Novolis.Testing.TestServer.csproj" />
     <Project Path="src/Novolis.Testing.ServiceBus/Novolis.Testing.ServiceBus.csproj" />

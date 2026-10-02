@@ -29,6 +29,7 @@ Follow [library-boundaries](https://github.com/Novolis-Platform/novolis-governan
 - `Novolis.Testing.TestBases`
 - `Novolis.Testing.Testcontainers`
 - `Novolis.Testing.TestServer`
+- `Novolis.Testing.Budgets`
 - `Novolis.Testing.TUnit`
 
 ## Topics

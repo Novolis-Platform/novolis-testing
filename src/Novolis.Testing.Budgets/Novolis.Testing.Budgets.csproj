@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Novolis.Testing.Budgets</PackageId>
+    <Description>TUnit ceilings for elapsed time, allocated bytes, and throughput, plus a BenchmarkDotNet JSON highlight reader.</Description>
+    <IsPackable>true</IsPackable>
+    <OutputType>Library</OutputType>
+    <IsTestProject>false</IsTestProject>
+    <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
+    <RootNamespace>Novolis.Testing.Budgets</RootNamespace>
+    <PackageTags>novolis;testing;tunit;benchmark;budget</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="TUnit" />
+  </ItemGroup>
+</Project>

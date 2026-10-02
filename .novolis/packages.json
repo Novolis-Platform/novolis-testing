@@ -12,6 +12,10 @@
       "project": "src/Novolis.Testing.TUnit/Novolis.Testing.TUnit.csproj",
       "paths": ["src/Novolis.Testing.TUnit/**", "Directory.Build.props", "Directory.Packages.props", "global.json", "Novolis.Testing.slnx"]
     },
+    "Novolis.Testing.Budgets": {
+      "project": "src/Novolis.Testing.Budgets/Novolis.Testing.Budgets.csproj",
+      "paths": ["src/Novolis.Testing.Budgets/**", "Directory.Build.props", "Directory.Packages.props", "global.json", "Novolis.Testing.slnx"]
+    },
     "Novolis.Testing.Testcontainers": {
       "project": "src/Novolis.Testing.Testcontainers/Novolis.Testing.Testcontainers.csproj",
       "paths": ["src/Novolis.Testing.Testcontainers/**", "Directory.Build.props", "Directory.Packages.props", "global.json", "Novolis.Testing.slnx"]

@@ -42,6 +42,7 @@
 | Package | Install | Package README |
 |---------|---------|----------------|
 | `Novolis.Testing.Appium` | `dotnet add package Novolis.Testing.Appium` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.Appium/README.md) |
+| `Novolis.Testing.Budgets` | `dotnet add package Novolis.Testing.Budgets` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.Budgets/README.md) |
 | `Novolis.Testing.Coverage` | `dotnet add package Novolis.Testing.Coverage` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.Coverage/README.md) |
 | `Novolis.Testing.Logging` | `dotnet add package Novolis.Testing.Logging` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.Logging/README.md) |
 | `Novolis.Testing.ServiceBus` | `dotnet add package Novolis.Testing.ServiceBus` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.ServiceBus/README.md) |
@@ -62,6 +63,7 @@ TUnit-first test helpers for Novolis library development.
 
 | Package | Purpose |
 |---------|---------|
+| `Novolis.Testing.Budgets` | Elapsed, allocation, and throughput ceilings for TUnit |
 | `Novolis.Testing.TUnit` | Test output and assertion helpers |
 | `Novolis.Testing.Logging` | Test logging utilities |
 | `Novolis.Testing.TestBases` | Shared test base types |

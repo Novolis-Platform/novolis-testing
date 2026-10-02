@@ -10,6 +10,7 @@
     <PackageReference Include="TUnit" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Novolis.Testing.Budgets\Novolis.Testing.Budgets.csproj" />
     <ProjectReference Include="..\..\src\Novolis.Testing.Appium\Novolis.Testing.Appium.csproj" />
     <ProjectReference Include="..\..\src\Novolis.Testing.Logging\Novolis.Testing.Logging.csproj" />
     <ProjectReference Include="..\..\src\Novolis.Testing.ServiceBus\Novolis.Testing.ServiceBus.csproj" />

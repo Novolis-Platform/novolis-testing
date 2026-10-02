@@ -15,6 +15,7 @@ Published docs: [https://novolis-platform.github.io/.github/novolis-testing/](ht
 - `Novolis.Testing.TestBases`
 - `Novolis.Testing.Testcontainers`
 - `Novolis.Testing.TestServer`
+- `Novolis.Testing.Budgets`
 - `Novolis.Testing.TUnit`
 
 ## Consumers
