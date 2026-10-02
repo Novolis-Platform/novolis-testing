@@ -8,6 +8,8 @@ namespace Novolis.Testing.Budgets;
 /// <param name="Throughput">Operations per second.</param>
 /// <param name="Unit">Throughput unit.</param>
 /// <param name="Gate">Ceiling headroom, or the profile error interval.</param>
+/// <param name="Gen0Collections">Generation-0 collections during the measured work. Reported, not gated.</param>
+/// <param name="WorkingSetBytes">Process working set after a budget sample. Profile rows leave this at zero.</param>
 public sealed record HighlightRow(
     string Probe,
     string Parameters,
@@ -15,4 +17,6 @@ public sealed record HighlightRow(
     long AllocatedBytes,
     double Throughput,
     string Unit,
-    string Gate);
+    string Gate,
+    int Gen0Collections = 0,
+    long WorkingSetBytes = 0);

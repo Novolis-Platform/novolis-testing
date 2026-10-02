@@ -17,12 +17,12 @@ public static class Highlight
 
     /// <summary>Renders a text table of highlight rows.</summary>
     /// <param name="rows">Rows to render.</param>
-    /// <returns>A table with probe, parameters, elapsed, allocated, throughput, and gate columns.</returns>
+    /// <returns>A table with probe, parameters, elapsed, allocated, gen-0, working set, throughput, and gate columns.</returns>
     public static string Format(IEnumerable<HighlightRow> rows)
     {
         ArgumentNullException.ThrowIfNull(rows);
         var builder = new StringBuilder();
-        builder.AppendLine("Probe | Parameters | Elapsed | Allocated | Throughput | Gate");
+        builder.AppendLine("Probe | Parameters | Elapsed | Allocated | Gen0 | WorkingSet | Throughput | Gate");
         foreach (var row in rows)
         {
             builder.Append(row.Probe);
@@ -32,6 +32,10 @@ public static class Highlight
             builder.Append(FormatElapsed(row.Elapsed));
             builder.Append(" | ");
             builder.Append(row.AllocatedBytes.ToString("N0", CultureInfo.InvariantCulture));
+            builder.Append(" B | ");
+            builder.Append(row.Gen0Collections.ToString("N0", CultureInfo.InvariantCulture));
+            builder.Append(" | ");
+            builder.Append(row.WorkingSetBytes.ToString("N0", CultureInfo.InvariantCulture));
             builder.Append(" B | ");
             builder.Append(row.Throughput.ToString("0.###", CultureInfo.InvariantCulture));
             builder.Append(' ');

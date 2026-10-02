@@ -8,6 +8,7 @@ namespace Novolis.Testing.Budgets;
 /// <param name="Unit">Label for throughput, such as <c>slices/s</c> or <c>ops/s</c>.</param>
 /// <param name="Parameters">Short description of the single case under test.</param>
 /// <param name="Allocations">Allocation counter. Async probes must use <see cref="AllocationScope.Process"/>.</param>
+/// <param name="Prepare">Unmeasured reset before every warmup and measured iteration. Time and allocations here are omitted from the sample.</param>
 public sealed record BudgetRun(
     string Probe,
     int Iterations,
@@ -15,4 +16,5 @@ public sealed record BudgetRun(
     long OperationsPerIteration = 1,
     string Unit = "ops/s",
     string Parameters = "",
-    AllocationScope Allocations = AllocationScope.CurrentThread);
+    AllocationScope Allocations = AllocationScope.CurrentThread,
+    Func<CancellationToken, ValueTask>? Prepare = null);

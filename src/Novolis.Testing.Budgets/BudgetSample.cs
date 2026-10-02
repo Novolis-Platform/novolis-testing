@@ -23,5 +23,5 @@ public sealed record BudgetSample(
     /// <param name="gate">Ceiling headroom or profile error text.</param>
     /// <returns>The highlight row.</returns>
     public HighlightRow ToHighlight(string gate) =>
-        new(Probe, Parameters, Elapsed, AllocatedBytes, Throughput, Unit, gate);
+        new(Probe, Parameters, Elapsed, AllocatedBytes, Throughput, Unit, gate, Gen0Collections, WorkingSetBytes);
 }

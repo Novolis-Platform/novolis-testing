@@ -83,7 +83,8 @@ public static class BenchmarkReport
                 ReadAllocated(benchmark),
                 throughput,
                 "ops/s",
-                $"± {Highlight.FormatElapsed(error)}"));
+                $"± {Highlight.FormatElapsed(error)}",
+                ReadGen0(benchmark)));
         }
 
         return rows;
@@ -117,9 +118,19 @@ public static class BenchmarkReport
 
         foreach (var metric in metrics.EnumerateArray())
         {
+            var descriptor = default(JsonElement);
+            var hasDescriptor = metric.TryGetProperty("Descriptor", out descriptor)
+                && descriptor.ValueKind == JsonValueKind.Object;
             var name = ReadString(metric, "Name");
             if (name.Length == 0)
                 name = ReadString(metric, "DisplayName");
+
+            if (name.Length == 0 && hasDescriptor)
+            {
+                name = ReadString(descriptor, "DisplayName");
+                if (name.Length == 0)
+                    name = ReadString(descriptor, "Id");
+            }
 
             if (!name.Contains("Allocat", StringComparison.OrdinalIgnoreCase))
                 continue;
@@ -128,6 +139,9 @@ public static class BenchmarkReport
                 continue;
 
             var unit = ReadString(metric, "Unit");
+            if (unit.Length == 0 && hasDescriptor)
+                unit = ReadString(descriptor, "Unit");
+
             if (unit.Equals("KB", StringComparison.OrdinalIgnoreCase))
                 return (long)Math.Round(amount * 1024d);
 
@@ -135,6 +149,19 @@ public static class BenchmarkReport
                 return (long)Math.Round(amount * 1024d * 1024d);
 
             return (long)Math.Round(amount);
+        }
+
+        return 0;
+    }
+
+    private static int ReadGen0(JsonElement benchmark)
+    {
+        if (benchmark.TryGetProperty("Memory", out var memory)
+            && memory.ValueKind == JsonValueKind.Object
+            && memory.TryGetProperty("Gen0Collections", out var gen0)
+            && gen0.TryGetInt32(out var count))
+        {
+            return count;
         }
 
         return 0;

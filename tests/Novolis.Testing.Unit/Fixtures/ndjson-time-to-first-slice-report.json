@@ -1,0 +1,41 @@
+{
+  "Title": "Novolis.IO.Ndjson.Benchmarks.NdjsonBenchmarks-20261003-012320",
+  "Benchmarks": [
+    {
+      "DisplayInfo": "NdjsonBenchmarks.TimeToFirstSliceAsync: DefaultJob [SizeMegabytes=100, RecordShape=short, NewlineStyle=LF]",
+      "Namespace": "Novolis.IO.Ndjson.Benchmarks",
+      "Type": "NdjsonBenchmarks",
+      "Method": "TimeToFirstSliceAsync",
+      "Parameters": "SizeMegabytes=100&RecordShape=short&NewlineStyle=LF",
+      "Statistics": {
+        "Mean": 1503851.7213255495,
+        "StandardError": 18319.333358360036
+      },
+      "Memory": {
+        "Gen0Collections": 3,
+        "Gen1Collections": 0,
+        "Gen2Collections": 0,
+        "TotalOperations": 512,
+        "BytesAllocatedPerOperation": 110473
+      },
+      "Metrics": [
+        {
+          "Value": 5.859375,
+          "Descriptor": {
+            "Id": "Gen0Collects",
+            "DisplayName": "Gen0",
+            "Unit": "Count"
+          }
+        },
+        {
+          "Value": 110473,
+          "Descriptor": {
+            "Id": "Allocated Memory",
+            "DisplayName": "Allocated",
+            "Unit": "B"
+          }
+        }
+      ]
+    }
+  ]
+}
