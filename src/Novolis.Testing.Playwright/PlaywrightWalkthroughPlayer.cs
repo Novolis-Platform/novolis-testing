@@ -1,32 +1,33 @@
 using System.Globalization;
 using System.Net;
-using System.Text.Json;
+using System.Text;
 
 namespace Novolis.Testing.Playwright;
 
-/// <summary>Builds the HTML scenario recording from parts and step frames.</summary>
+/// <summary>Builds a static HTML document for one walkthrough. JavaScript only advances steps.</summary>
 public static class PlaywrightWalkthroughPlayer
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-    };
-
     /// <summary>Default hold when the manifest omits a usable duration.</summary>
     public const int DefaultFrameHoldMilliseconds = 4000;
 
-    /// <summary>Renders a self-contained recording that steps through PNG frames.</summary>
+    /// <summary>Renders a self-contained recording that can be read without JavaScript.</summary>
     /// <param name="manifest">Walkthrough written by <see cref="PlaywrightSession"/>.</param>
     /// <returns>HTML document.</returns>
-    public static string Render(PlaywrightWalkthroughManifest manifest)
+    public static string Render(PlaywrightWalkthroughManifest manifest) =>
+        Render(manifest, indexHref: null);
+
+    /// <summary>Renders a self-contained recording that can be read without JavaScript.</summary>
+    /// <param name="manifest">Walkthrough written by <see cref="PlaywrightSession"/>.</param>
+    /// <param name="indexHref">Optional relative link back to the collection index.</param>
+    /// <returns>HTML document.</returns>
+    public static string Render(PlaywrightWalkthroughManifest manifest, string? indexHref)
     {
         ArgumentNullException.ThrowIfNull(manifest);
         var hold = manifest.FrameHoldMilliseconds > 0
             ? manifest.FrameHoldMilliseconds
             : DefaultFrameHoldMilliseconds;
-        var framesJson = JsonSerializer.Serialize(manifest.Steps, JsonOptions);
-        var title = Encode(manifest.Title);
-        var partCount = manifest.Steps.Select(step => step.Part).Distinct(StringComparer.Ordinal).Count();
+        var title = PlaywrightWalkthroughTitle.Display(manifest.Title);
+        var partCount = PlaywrightWalkthroughOutline.SectionCount(manifest.Steps);
         var raw = string.IsNullOrWhiteSpace(manifest.RawCaptureFile)
             ? string.Empty
             : $"""
@@ -35,167 +36,94 @@ public static class PlaywrightWalkthroughPlayer
                 <video controls muted src="{Encode(manifest.RawCaptureFile)}"></video>
               </details>
               """;
-        return
-            $$"""
+        var indexLink = string.IsNullOrWhiteSpace(indexHref)
+            ? string.Empty
+            : $"<p class=\"crumb\"><a href=\"{Encode(indexHref)}\">All walkthroughs</a></p>";
+        const string template = """
             <!doctype html>
             <html lang="en">
             <head>
               <meta charset="utf-8"/>
               <meta name="viewport" content="width=device-width, initial-scale=1"/>
-              <title>{{title}}</title>
+              <title>__TITLE__</title>
               <style>
-                :root { color-scheme: dark; }
-                * { box-sizing: border-box; }
-                body { font-family: Segoe UI, sans-serif; margin: 0; background: #141414; color: #f2f2f2; }
+                body { font-family: Georgia, "Times New Roman", serif; margin: 0; color: #1a1a1a; background: #f7f4ee; line-height: 1.45; }
                 .layout { display: grid; grid-template-columns: minmax(16rem, 22rem) 1fr; min-height: 100vh; }
                 @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
-                aside { background: #1c1c1c; border-right: 1px solid #2e2e2e; padding: 1.25rem; overflow: auto; }
-                main { padding: 1.25rem 1.5rem 2rem; }
-                h1 { font-size: 1.35rem; margin: 0 0 .35rem; }
-                .meta { color: #b8b8b8; margin: 0 0 1rem; }
-                .part-label { text-transform: uppercase; letter-spacing: .08em; font-size: .72rem; color: #c4a574; margin: 0 0 .25rem; }
-                .step-title { font-size: 1.15rem; margin: 0 0 .5rem; }
-                .narration { background: #231f18; border: 1px solid #5c4a2e; color: #f4e6c8; padding: .85rem 1rem; margin: 0 0 1rem; line-height: 1.45; }
-                .recording { background: #0d0d0d; border: 1px solid #2a2a2a; }
-                .recording img { display: block; width: 100%; height: auto; background: #111; }
-                .bar { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; padding: .75rem 1rem; border-top: 1px solid #2a2a2a; }
-                button { background: #2a2a2a; color: #eee; border: 1px solid #444; padding: .4rem .75rem; cursor: pointer; }
-                #play { background: #3d3224; border-color: #c4a574; }
-                button[aria-pressed="true"] { border-color: #c4a574; }
-                .outline h2 { font-size: .95rem; font-weight: 650; letter-spacing: 0; color: #e6c48a; margin: 1.1rem 0 .4rem; line-height: 1.35; }
-                .outline h2:first-child { margin-top: 0; }
+                aside { background: #efe8da; border-right: 1px solid #d4cbb8; padding: 1.25rem 1.1rem 6rem; overflow: auto; }
+                main { padding: 1.25rem 1.5rem 6rem; max-width: 52rem; }
+                h1, h2, h3, .step-title { font-family: Segoe UI, sans-serif; font-weight: 650; letter-spacing: 0; text-transform: none; overflow-wrap: break-word; }
+                h1 { font-size: 1.65rem; margin: 0 0 .35rem; }
+                h2 { font-size: 1.05rem; margin: 1.2rem 0 .4rem; }
+                h3 { font-size: .95rem; margin: .85rem 0 .3rem; font-weight: 600; color: #3d3d3d; }
+                .meta, .crumb { font-family: Segoe UI, sans-serif; color: #4a4a4a; margin: 0 0 .85rem; }
+                .crumb a { color: #1d4b6e; }
+                .part-label { font-family: Segoe UI, sans-serif; font-size: .85rem; color: #5a4a32; margin: 0 0 .25rem; letter-spacing: 0; text-transform: none; }
+                .narration { background: #fff8ea; border: 1px solid #d8c7a2; padding: .75rem .9rem; margin: 0 0 1rem; }
                 .outline { list-style: none; margin: 0; padding: 0; }
-                .outline button { width: 100%; text-align: left; margin: 0 0 .45rem; white-space: normal; overflow-wrap: anywhere; line-height: 1.35; letter-spacing: 0; word-spacing: .04em; }
-                .outline h3 { font-size: .88rem; font-weight: 600; margin: .7rem 0 .3rem .15rem; color: #d0d0d0; line-height: 1.35; letter-spacing: 0; }
-                .outline h3.deviated, .kind-line.deviated, .flow-label.deviated { color: #e0a060; }
-                .outline h3.planned, .kind-line.planned { color: #8aab8a; }
-                .outline h3.closed, .kind-line.closed { color: #9a9a9a; }
-                .outline button.deviated { border-left: 3px solid #e0a060; }
-                .outline button.planned { border-left: 3px solid #8aab8a; }
-                .outline button.closed { border-left: 3px solid #666; }
-                .flow-label { font-size: .85rem; margin: 0 0 .35rem; color: #c4a574; }
-                .kind-line { margin: 0 0 .75rem; font-size: .9rem; }
-                .raw { margin-top: 1.25rem; color: #999; }
+                .outline ol { list-style: none; margin: 0 0 .35rem; padding-left: 1.15rem; }
+                .outline li { margin: .35rem 0; overflow-wrap: break-word; word-spacing: normal; }
+                .section-heading { font-family: Segoe UI, sans-serif; font-weight: 650; margin: .55rem 0 .2rem; letter-spacing: 0; text-transform: none; overflow-wrap: break-word; }
+                .outline a { color: #1d4b6e; text-decoration: none; }
+                .outline a:hover, .outline a[aria-current="true"] { text-decoration: underline; }
+                article.step { margin: 2.25rem 0 0; padding-top: .25rem; scroll-margin-top: 5rem; }
+                article.step img { display: block; width: 100%; height: auto; background: #fff; border: 1px solid #d4cbb8; }
+                .bar { position: sticky; bottom: 0; display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; padding: .65rem 1rem; background: #efe8da; border-top: 1px solid #d4cbb8; font-family: Segoe UI, sans-serif; }
+                button { background: #fff; color: #1a1a1a; border: 1px solid #8a7b62; padding: .4rem .75rem; cursor: pointer; }
+                #play { background: #3d3224; border-color: #3d3224; color: #f7f4ee; }
+                .kind-line.deviated, h3.deviated { color: #8a4b12; }
+                .kind-line.planned, h3.planned { color: #2f5d2f; }
+                .kind-line.closed, h3.closed { color: #555; }
+                .raw { margin-top: 1.25rem; color: #555; }
                 .raw video { width: min(100%, 720px); margin-top: .5rem; }
               </style>
             </head>
             <body>
               <div class="layout">
                 <aside>
-                  <p class="meta">{{partCount}} parts · {{manifest.Steps.Count}} steps</p>
-                  <div id="outline" class="outline"></div>
+                  __INDEX__
+                  <p class="meta">__COUNTS__</p>
+                  <nav class="outline" aria-label="Steps">__OUTLINE__</nav>
                 </aside>
                 <main>
-                  <h1>{{title}}</h1>
-                  <p class="meta">Scenario recording. Starts paused. {{(hold / 1000.0).ToString("0.#", CultureInfo.InvariantCulture)}}s per step.</p>
-                  <p class="part-label" id="part"></p>
-                  <p class="flow-label" id="flow" hidden></p>
-                  <h2 class="step-title" id="stepTitle"></h2>
-                  <p class="kind-line" id="kind" hidden></p>
-                  <p class="narration" id="narration">Play when you want to walk the scenario. The outline on the left is the story.</p>
-                  <section class="recording" aria-label="Walkthrough recording">
-                    <img id="frame" alt=""/>
-                    <div class="bar">
-                      <button type="button" id="prev">Previous</button>
-                      <button type="button" id="play" aria-pressed="false">Play scenario</button>
-                      <button type="button" id="next">Next</button>
-                      <span class="meta" id="progress"></span>
-                    </div>
-                  </section>
-                  {{raw}}
+                  __INDEX__
+                  <h1>__TITLE__</h1>
+                  <p class="meta">__INTRO__</p>
+                  __ARTICLES__
+                  __RAW__
                 </main>
               </div>
+              <div class="bar">
+                <button type="button" id="prev">Previous</button>
+                <button type="button" id="play" aria-pressed="false">Play scenario</button>
+                <button type="button" id="next">Next</button>
+                <span class="meta" id="progress"></span>
+              </div>
               <script>
-                const frames = {{framesJson}};
-                const hold = {{hold}};
-                const img = document.getElementById("frame");
-                const partEl = document.getElementById("part");
-                const flowEl = document.getElementById("flow");
-                const titleEl = document.getElementById("stepTitle");
-                const kindEl = document.getElementById("kind");
-                const narrationEl = document.getElementById("narration");
-                const progressEl = document.getElementById("progress");
+                const articles = Array.from(document.querySelectorAll("article.step"));
+                const links = Array.from(document.querySelectorAll("nav.outline a[href^='#step-']"));
+                const hold = __HOLD__;
                 const play = document.getElementById("play");
-                const outline = document.getElementById("outline");
+                const progress = document.getElementById("progress");
                 let index = 0;
                 let timer = 0;
                 let running = false;
-
                 function show(i) {
-                  if (!frames.length) {
-                    titleEl.textContent = "No frames recorded.";
-                    return;
-                  }
-                  index = (i + frames.length) % frames.length;
-                  const step = frames[index];
-                  img.src = step.frameFile;
-                  img.alt = step.name;
-                  partEl.textContent = "Part · " + (step.part || "Scenario");
-                  const path = step.flowPath || step.flow || "";
-                  flowEl.textContent = path;
-                  flowEl.hidden = !path;
-                  flowEl.className = "flow-label " + (step.kind || "");
-                  titleEl.textContent = step.name;
-                  const kindLine = step.kind === "deviated"
-                    ? "This flow departed from the usual clock."
-                    : step.kind === "planned"
-                      ? "This day followed the usual clock."
-                      : step.kind === "closed"
-                        ? "The shop was shut. Not a gap."
-                        : "";
-                  kindEl.textContent = kindLine;
-                  kindEl.hidden = !kindLine;
-                  kindEl.className = "kind-line " + (step.kind || "");
-                  narrationEl.textContent = step.narration || step.name;
-                  progressEl.textContent = "Step " + (index + 1) + " of " + frames.length;
-                  for (const button of outline.querySelectorAll("button[data-index]")) {
-                    button.setAttribute("aria-pressed", button.dataset.index === String(index) ? "true" : "false");
+                  if (!articles.length) return;
+                  index = (i + articles.length) % articles.length;
+                  articles[index].scrollIntoView({ behavior: "smooth", block: "start" });
+                  progress.textContent = "Step " + (index + 1) + " of " + articles.length;
+                  for (const link of links) {
+                    link.setAttribute("aria-current", link.getAttribute("href") === "#step-" + (index + 1) ? "true" : "false");
                   }
                 }
-
                 function setRunning(on) {
-                  running = on && frames.length > 1;
+                  running = on && articles.length > 1;
                   play.textContent = running ? "Pause" : "Play scenario";
                   play.setAttribute("aria-pressed", running ? "true" : "false");
                   window.clearInterval(timer);
-                  if (running) {
-                    timer = window.setInterval(() => show(index + 1), hold);
-                  }
+                  if (running) timer = window.setInterval(() => show(index + 1), hold);
                 }
-
-                let lastPart = "";
-                let lastGroup = "";
-                frames.forEach((step, i) => {
-                  if (step.part && step.part !== lastPart) {
-                    const heading = document.createElement("h2");
-                    heading.textContent = step.part;
-                    outline.appendChild(heading);
-                    lastPart = step.part;
-                    lastGroup = "";
-                  }
-                  const group = step.flowPath || step.flow || "";
-                  if (group && group !== lastGroup) {
-                    const flowHead = document.createElement("h3");
-                    flowHead.textContent = group;
-                    flowHead.className = step.kind || "";
-                    outline.appendChild(flowHead);
-                    lastGroup = group;
-                  }
-                  const button = document.createElement("button");
-                  button.type = "button";
-                  button.textContent = step.index + ". " + step.name;
-                  button.dataset.index = String(i);
-                  button.dataset.kind = step.kind || "";
-                  button.dataset.depth = String(step.depth || 0);
-                  const depth = Number(step.depth || 0);
-                  button.style.marginLeft = (depth * 12) + "px";
-                  if (step.kind) {
-                    button.classList.add(step.kind);
-                  }
-                  button.addEventListener("click", () => { show(i); setRunning(false); });
-                  outline.appendChild(button);
-                });
-
                 document.getElementById("prev").addEventListener("click", () => { show(index - 1); setRunning(false); });
                 document.getElementById("next").addEventListener("click", () => { show(index + 1); setRunning(false); });
                 play.addEventListener("click", () => setRunning(!running));
@@ -204,12 +132,125 @@ public static class PlaywrightWalkthroughPlayer
                   if (event.key === "ArrowLeft") { show(index - 1); setRunning(false); }
                   if (event.key === " ") { event.preventDefault(); setRunning(!running); }
                 });
-
                 show(0);
               </script>
             </body>
             </html>
             """;
+        return template
+            .Replace("__TITLE__", Encode(title), StringComparison.Ordinal)
+            .Replace("__INDEX__", indexLink, StringComparison.Ordinal)
+            .Replace(
+                "__COUNTS__",
+                partCount.ToString(CultureInfo.InvariantCulture) + " sections · " +
+                manifest.Steps.Count.ToString(CultureInfo.InvariantCulture) + " steps",
+                StringComparison.Ordinal)
+            .Replace("__OUTLINE__", BuildOutline(manifest), StringComparison.Ordinal)
+            .Replace(
+                "__INTRO__",
+                "Read down the page, or use Play / Next. " +
+                (hold / 1000.0).ToString("0.#", CultureInfo.InvariantCulture) +
+                "s per step when playing.",
+                StringComparison.Ordinal)
+            .Replace("__ARTICLES__", BuildArticles(manifest), StringComparison.Ordinal)
+            .Replace("__RAW__", raw, StringComparison.Ordinal)
+            .Replace("__HOLD__", hold.ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal);
+    }
+
+    private static string BuildOutline(PlaywrightWalkthroughManifest manifest)
+    {
+        var text = new StringBuilder();
+        text.Append("<ol class=\"outline-root\">");
+        foreach (var op in PlaywrightWalkthroughOutline.Build(manifest.Steps))
+        {
+            if (op.Action == "open")
+            {
+                var kind = string.IsNullOrWhiteSpace(op.Kind) ? string.Empty : " " + Encode(op.Kind);
+                text.Append("<li class=\"section")
+                    .Append(kind)
+                    .Append("\">");
+                if (!string.IsNullOrWhiteSpace(op.Heading))
+                {
+                    text.Append("<div class=\"section-heading\">")
+                        .Append(Encode(op.Heading))
+                        .Append("</div>");
+                }
+
+                text.Append("<ol>");
+            }
+            else if (op.Action == "close")
+            {
+                text.Append("</ol></li>");
+            }
+            else if (op.Step is { } step)
+            {
+                text.Append("<li class=\"step\"><a href=\"#step-")
+                    .Append(step.Index.ToString(CultureInfo.InvariantCulture))
+                    .Append("\">")
+                    .Append(Encode(step.Name))
+                    .Append("</a></li>");
+            }
+        }
+
+        text.Append("</ol>");
+        return text.ToString();
+    }
+
+    private static string BuildArticles(PlaywrightWalkthroughManifest manifest)
+    {
+        var text = new StringBuilder();
+        foreach (var step in manifest.Steps)
+        {
+            var kindLine = step.Kind switch
+            {
+                "deviated" => "This flow departed from the usual clock.",
+                "planned" => "This day followed the usual clock.",
+                "closed" => "The shop was shut. Not a gap.",
+                _ => string.Empty,
+            };
+            var path = PlaywrightWalkthroughOutline.PathOf(step);
+            text.Append("<article class=\"step\" id=\"step-")
+                .Append(step.Index.ToString(CultureInfo.InvariantCulture))
+                .Append("\" style=\"padding-left:")
+                .Append((path.Count * 1.15).ToString("0.##", CultureInfo.InvariantCulture))
+                .Append("rem\">");
+            foreach (var heading in path.Where(heading => !string.IsNullOrWhiteSpace(heading)))
+            {
+                text.Append("<p class=\"part-label\">").Append(Encode(heading)).Append("</p>");
+            }
+
+            text.Append("<h2 class=\"step-title\">")
+                .Append(step.Index.ToString(CultureInfo.InvariantCulture))
+                .Append(". ")
+                .Append(Encode(step.Name))
+                .Append("</h2>");
+            if (!string.IsNullOrWhiteSpace(kindLine))
+            {
+                text.Append("<p class=\"kind-line ")
+                    .Append(Encode(step.Kind))
+                    .Append("\">")
+                    .Append(Encode(kindLine))
+                    .Append("</p>");
+            }
+
+            if (!string.IsNullOrWhiteSpace(step.Narration))
+            {
+                text.Append("<p class=\"narration\">").Append(Encode(step.Narration)).Append("</p>");
+            }
+
+            if (!string.IsNullOrWhiteSpace(step.FrameFile))
+            {
+                text.Append("<img src=\"")
+                    .Append(Encode(step.FrameFile.Replace('\\', '/')))
+                    .Append("\" alt=\"")
+                    .Append(Encode(step.Name))
+                    .Append("\"/>");
+            }
+
+            text.Append("</article>");
+        }
+
+        return text.ToString();
     }
 
     private static string Encode(string? value) => WebUtility.HtmlEncode(value ?? string.Empty);

@@ -6,7 +6,7 @@ namespace Novolis.Testing.Playwright;
 
 /// <summary>
 /// <see cref="PageTest"/> plus per-test walkthrough storage. Inherit as <c>MyTests : PlaywrightTestBase</c>.
-/// TUnit owns the browser; this type writes step frames and an HTML recording.
+/// TUnit owns the browser; this type writes step frames, a Markdown story, and an HTML document.
 /// </summary>
 public abstract class PlaywrightTestBase : PageTest
 {
@@ -30,7 +30,8 @@ public abstract class PlaywrightTestBase : PageTest
     protected virtual PlaywrightSessionOptions CreateOptions() => new()
     {
         ArtifactDirectory = PlaywrightArtifactStore.ForCurrentTest(),
-        WalkthroughTitle = TestContext.Current?.Metadata.TestName ?? GetType().Name,
+        WalkthroughTitle = PlaywrightWalkthroughTitle.Display(
+            TestContext.Current?.Metadata.TestName ?? GetType().Name),
     };
 
     /// <inheritdoc />

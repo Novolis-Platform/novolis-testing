@@ -6,9 +6,11 @@
 
 # Novolis.Testing.Playwright
 
-Walkthrough storage on top of **[TUnit.Playwright](https://www.nuget.org/packages/TUnit.Playwright)** `PageTest`. TUnit owns the browser lifecycle. This package writes a watchable **recording** of each test:
+Walkthrough storage on top of **[TUnit.Playwright](https://www.nuget.org/packages/TUnit.Playwright)** `PageTest`. TUnit owns the browser lifecycle. This package writes a readable **story** of each test:
 
-- `walkthrough.html` — HTML recording with a part outline, narration, and stills (4s hold, starts paused)
+- `walkthrough.md` — Markdown story (open in any editor; frames sit next to the narration)
+- `walkthrough.html` — the same pages as a static document, with Play / Next
+- `index.md` / `index.html` — collection of the latest recording of each scenario
 - `frames/NN-step.png` — one full-page shot per `StepAsync`
 - `walkthrough.json` — part + step timeline
 - `trace.zip` — Playwright trace (optional, on by default)
@@ -46,7 +48,7 @@ public sealed class DoorTests : PlaywrightTestBase
     {
         Session.BeginPart("1. Sign in");
         await Session.StepAsync("Open door", "The week is behind the door.", page => page.GotoAsync("/"));
-        using (Session.BeginFlow("Set usual hours"))
+        using (Session.BeginSection("Set usual hours"))
         {
             await Session.StepAsync("Open My hours", "The usual clock is a form.", page =>
                 page.GetByRole(AriaRole.Link, new() { Name = "My hours" }).ClickAsync());
@@ -72,7 +74,7 @@ public sealed class DoorTests : PlaywrightTestBase
 }
 ```
 
-After the test, open `walkthrough.html` in the artifact folder.
+After the test, open `walkthrough.md` to read, or `index.html` at the artifact root to jump between scenarios.
 
 ## Related packages
 

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>Novolis.Testing.Playwright</PackageId>
-    <Description>Walkthrough video, frames, and HTML on top of TUnit.Playwright PageTest.</Description>
+    <Description>Walkthrough frames, Markdown story, HTML document, and a collection index on top of TUnit.Playwright PageTest.</Description>
     <IsPackable>true</IsPackable>
     <OutputType>Library</OutputType>
     <IsTestProject>false</IsTestProject>

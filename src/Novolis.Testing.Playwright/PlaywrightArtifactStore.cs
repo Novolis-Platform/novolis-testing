@@ -47,6 +47,29 @@ public static class PlaywrightArtifactStore
     }
 
     /// <summary>
+    /// Walks from a per-test stamp folder up to the collection root
+    /// (<c>artifacts/playwright</c>), so the index sits next to the recordings.
+    /// </summary>
+    /// <param name="artifactDirectory">Stamp folder written by <see cref="ForCurrentTest"/>.</param>
+    /// <returns>Absolute collection root.</returns>
+    public static string CatalogRootFrom(string artifactDirectory)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(artifactDirectory);
+        var cursor = new DirectoryInfo(Path.GetFullPath(artifactDirectory));
+        while (cursor is not null)
+        {
+            if (cursor.Name.Equals("playwright", StringComparison.OrdinalIgnoreCase))
+            {
+                return cursor.FullName;
+            }
+
+            cursor = cursor.Parent;
+        }
+
+        return ResolveRoot();
+    }
+
+    /// <summary>
     /// Builds a unique folder for the current TUnit test, or <paramref name="testName"/> when supplied.
     /// </summary>
     /// <param name="testName">Optional test identity. When omitted, TUnit <see cref="TestContext"/> is used.</param>

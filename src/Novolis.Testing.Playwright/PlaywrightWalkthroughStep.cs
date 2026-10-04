@@ -1,6 +1,6 @@
 namespace Novolis.Testing.Playwright;
 
-/// <summary>One captured step inside a scenario part, optionally nested in a flow.</summary>
+/// <summary>One captured step inside a scenario, nested in zero or more sections.</summary>
 public sealed record PlaywrightWalkthroughStep(
     int Index,
     string Part,
@@ -11,4 +11,5 @@ public sealed record PlaywrightWalkthroughStep(
     int Depth = 0,
     string Flow = "",
     string FlowPath = "",
-    string Kind = "");
+    string Kind = "",
+    IReadOnlyList<string>? Sections = null);

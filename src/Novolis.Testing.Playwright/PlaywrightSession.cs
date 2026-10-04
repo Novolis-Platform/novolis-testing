@@ -16,7 +16,7 @@ public sealed class PlaywrightSession
     };
 
     private readonly List<PlaywrightWalkthroughStep> steps = [];
-    private readonly Stack<(string Name, PlaywrightWalkthroughFlowKind Kind)> flows = new();
+    private readonly Stack<(string Heading, PlaywrightWalkthroughFlowKind Kind)> sections = new();
     private readonly PlaywrightSessionOptions options;
 
     /// <summary>Attaches to a TUnit-owned page.</summary>
@@ -43,26 +43,32 @@ public sealed class PlaywrightSession
     /// <summary>Absolute walkthrough JSON path after <see cref="FlushAsync"/>.</summary>
     public string ManifestPath => Path.Combine(ArtifactDirectory, "walkthrough.json");
 
-    /// <summary>Absolute HTML player path after <see cref="FlushAsync"/>.</summary>
+    /// <summary>Absolute HTML document path after <see cref="FlushAsync"/>.</summary>
     public string PlayerPath => Path.Combine(ArtifactDirectory, "walkthrough.html");
+
+    /// <summary>Absolute Markdown story path after <see cref="FlushAsync"/>.</summary>
+    public string MarkdownPath => Path.Combine(ArtifactDirectory, "walkthrough.md");
 
     /// <summary>Recorded steps captured so far.</summary>
     public IReadOnlyList<PlaywrightWalkthroughStep> Steps => steps;
 
-    /// <summary>Current scenario part. Steps inherit this until the next <see cref="BeginPart"/>.</summary>
-    public string CurrentPart { get; private set; } = "Scenario";
+    /// <summary>Outermost named section, or <c>Scenario</c> when none is open.</summary>
+    public string CurrentPart =>
+        CurrentSections.FirstOrDefault(heading => !string.IsNullOrWhiteSpace(heading)) ?? "Scenario";
 
-    private string CurrentFlowName => flows.Count == 0 ? string.Empty : flows.Peek().Name;
+    private IReadOnlyList<string> CurrentSections =>
+        sections.Reverse().Select(section => section.Heading).ToArray();
+
+    private string CurrentFlowName =>
+        CurrentSections.LastOrDefault(heading => !string.IsNullOrWhiteSpace(heading)) ?? string.Empty;
 
     private string CurrentFlowPath =>
-        flows.Count == 0
-            ? string.Empty
-            : string.Join(" · ", flows.Reverse().Select(flow => flow.Name));
+        string.Join(" · ", CurrentSections.Where(heading => !string.IsNullOrWhiteSpace(heading)));
 
     private string CurrentKindWire =>
-        flows.Count == 0
+        sections.Count == 0
             ? string.Empty
-            : flows.Peek().Kind switch
+            : sections.Peek().Kind switch
             {
                 PlaywrightWalkthroughFlowKind.Planned => "planned",
                 PlaywrightWalkthroughFlowKind.Deviated => "deviated",
@@ -70,36 +76,44 @@ public sealed class PlaywrightSession
                 _ => string.Empty,
             };
 
-    /// <summary>Starts a named part. Later steps belong to it until the next part.</summary>
-    /// <param name="name">Part title shown in the recording outline.</param>
+    /// <summary>Opens a top-level section. Later <see cref="BeginPart"/> calls replace it.</summary>
+    /// <param name="name">Section heading.</param>
     public void BeginPart(string name)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        CurrentPart = name;
+        sections.Clear();
+        sections.Push((name, PlaywrightWalkthroughFlowKind.Default));
     }
 
     /// <summary>
-    /// Opens a nested flow. Steps taken before dispose inherit depth, path, and kind
-    /// so a Changed day or usual-hours save can show every screen, not one end frame.
-    /// Flows stack; dispose in reverse order.
+    /// Opens a nestable section. A heading plus indent, or indent only when
+    /// <paramref name="heading"/> is omitted. Dispose to leave the section.
     /// </summary>
-    /// <param name="name">Outline heading for this nest.</param>
-    /// <param name="kind">Whether this nest followed the usual clock, left it, or was shut.</param>
-    /// <returns>Scope that pops the flow when disposed.</returns>
-    public PlaywrightWalkthroughFlow BeginFlow(
-        string name,
+    /// <param name="heading">Section title. Null or blank is a sectionless indent.</param>
+    /// <param name="kind">Optional kind inherited by steps in this nest.</param>
+    /// <returns>Scope that pops the section when disposed.</returns>
+    public PlaywrightWalkthroughFlow BeginSection(
+        string? heading = null,
         PlaywrightWalkthroughFlowKind kind = PlaywrightWalkthroughFlowKind.Default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        flows.Push((name, kind));
+        sections.Push((heading ?? string.Empty, kind));
         return new PlaywrightWalkthroughFlow(() =>
         {
-            if (flows.Count > 0)
+            if (sections.Count > 0)
             {
-                flows.Pop();
+                sections.Pop();
             }
         });
     }
+
+    /// <summary>Opens a named nested section. Prefer <see cref="BeginSection"/>.</summary>
+    /// <param name="name">Section heading.</param>
+    /// <param name="kind">Optional kind inherited by steps in this nest.</param>
+    /// <returns>Scope that pops the section when disposed.</returns>
+    public PlaywrightWalkthroughFlow BeginFlow(
+        string name,
+        PlaywrightWalkthroughFlowKind kind = PlaywrightWalkthroughFlowKind.Default) =>
+        BeginSection(name, kind);
 
     /// <summary>
     /// Runs one named walkthrough step, then stores a PNG frame so the HTML player can replay it.
@@ -152,10 +166,11 @@ public sealed class PlaywrightSession
             narration ?? string.Empty,
             $"frames/{fileName}",
             DateTimeOffset.UtcNow,
-            flows.Count,
+            sections.Count,
             CurrentFlowName,
             CurrentFlowPath,
-            CurrentKindWire));
+            CurrentKindWire,
+            CurrentSections));
     }
 
     /// <summary>
@@ -178,7 +193,14 @@ public sealed class PlaywrightSession
             options.FrameHoldMilliseconds,
             steps);
         await File.WriteAllTextAsync(ManifestPath, JsonSerializer.Serialize(manifest, JsonOptions));
-        await File.WriteAllTextAsync(PlayerPath, PlaywrightWalkthroughPlayer.Render(manifest));
+        var catalogRoot = PlaywrightArtifactStore.CatalogRootFrom(ArtifactDirectory);
+        var indexHref = Path.GetRelativePath(ArtifactDirectory, Path.Combine(catalogRoot, PlaywrightWalkthroughCatalog.MarkdownFileName))
+            .Replace('\\', '/');
+        var htmlIndexHref = Path.GetRelativePath(ArtifactDirectory, Path.Combine(catalogRoot, PlaywrightWalkthroughCatalog.HtmlFileName))
+            .Replace('\\', '/');
+        await File.WriteAllTextAsync(MarkdownPath, PlaywrightWalkthroughMarkdown.Render(manifest, indexHref));
+        await File.WriteAllTextAsync(PlayerPath, PlaywrightWalkthroughPlayer.Render(manifest, htmlIndexHref));
+        PlaywrightWalkthroughCatalog.Refresh(catalogRoot);
     }
 
     private async Task<string?> CopyRawCaptureAsync()

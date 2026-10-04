@@ -40,4 +40,17 @@ public sealed class PlaywrightArtifactStoreTests
         await Assert.That(Directory.Exists(Path.Combine(directory, "frames"))).IsTrue();
         await Assert.That(directory.Contains("artifact_store", StringComparison.Ordinal)).IsTrue();
     }
+
+    [Test]
+    public async Task CatalogRootFrom_walks_up_to_the_playwright_folder()
+    {
+        var stamp = Path.Combine(
+            Path.GetTempPath(),
+            "playwright",
+            "HoursMixedRoleTests",
+            "Alice_has_a_week",
+            "20261004T193127887");
+        await Assert.That(PlaywrightArtifactStore.CatalogRootFrom(stamp))
+            .IsEqualTo(Path.GetFullPath(Path.Combine(Path.GetTempPath(), "playwright")));
+    }
 }
