@@ -64,14 +64,16 @@ public static class PlaywrightArtifactStore
         return directory;
     }
 
-    /// <summary>Replaces characters that cannot appear in a Windows file name.</summary>
+    /// <summary>Replaces characters that cannot appear in a file name on Windows or Linux.</summary>
     /// <param name="value">Raw test or class name.</param>
     /// <returns>Safe folder segment.</returns>
     public static string Sanitize(string value)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(value);
-        var invalid = Path.GetInvalidFileNameChars();
-        var chars = value.Select(ch => invalid.Contains(ch) || ch is ' ' ? '_' : ch).ToArray();
+        var chars = value.Select(ch => IsUnsafeFileNameChar(ch) ? '_' : ch).ToArray();
         return new string(chars);
     }
+
+    private static bool IsUnsafeFileNameChar(char ch) =>
+        ch < 32 || ch is ' ' or '"' or '<' or '>' or '|' or ':' or '*' or '?' or '\\' or '/';
 }
