@@ -47,21 +47,6 @@ public static class PlaywrightWalkthroughCatalog
         }
     }
 
-    /// <summary>Stable in-page id for a class and test name.</summary>
-    public static string AnchorOf(string className, string testName)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(className);
-        ArgumentException.ThrowIfNullOrWhiteSpace(testName);
-        var raw = className + "-" + testName;
-        var text = new StringBuilder(raw.Length);
-        foreach (var c in raw)
-        {
-            text.Append(char.IsAsciiLetterOrDigit(c) ? char.ToLowerInvariant(c) : '-');
-        }
-
-        return text.ToString().Trim('-');
-    }
-
     private static IReadOnlyList<PlaywrightWalkthroughCatalogEntry> RefreshCore(string root)
     {
         Directory.CreateDirectory(root);
@@ -105,7 +90,10 @@ public static class PlaywrightWalkthroughCatalog
                 PlaywrightWalkthroughMarkdown.Render(manifest, indexHref));
             File.WriteAllText(
                 Path.Combine(directory, "walkthrough.html"),
-                PlaywrightWalkthroughPlayer.Render(manifest, htmlIndexHref));
+                PlaywrightWalkthroughPlayer.Render(
+                    manifest,
+                    htmlIndexHref,
+                    relative => PlaywrightWalkthroughAssets.ToDataUriOrPath(directory, relative)));
 
             var className = ClassNameOf(relative);
             var testName = TestNameOf(relative);
@@ -146,7 +134,7 @@ public static class PlaywrightWalkthroughCatalog
         var text = new StringBuilder();
         text.AppendLine("# Walkthroughs");
         text.AppendLine();
-        text.AppendLine("Latest recording of each scenario. Markdown is the story. HTML is the same pages with Play / Next.");
+        text.AppendLine("Latest recording of each scenario. Markdown is the story. Each walkthrough.html is one portable file.");
         text.AppendLine();
         if (entries.Count == 0)
         {
@@ -183,7 +171,7 @@ public static class PlaywrightWalkthroughCatalog
         ArgumentNullException.ThrowIfNull(entries);
         var body = new StringBuilder();
         body.AppendLine("<h1>Walkthroughs</h1>");
-        body.AppendLine("<p>Click a scenario. It stays on this page. Frames load from the same folder as this file.</p>");
+        body.AppendLine("<p>Each walkthrough.html is one portable file. Screenshots travel inside it. This index only lists the books.</p>");
         if (entries.Count == 0)
         {
             body.AppendLine("<p>No walkthroughs have been written yet.</p>");
@@ -207,8 +195,8 @@ public static class PlaywrightWalkthroughCatalog
                     lastClass = entry.ClassName;
                 }
 
-                body.Append("<li><a href=\"#")
-                    .Append(Encode(entry.Anchor))
+                body.Append("<li><a href=\"")
+                    .Append(Encode(entry.HtmlHref))
                     .Append("\">")
                     .Append(Encode(entry.Title))
                     .Append("</a> · ")
@@ -221,23 +209,6 @@ public static class PlaywrightWalkthroughCatalog
             if (lastClass is not null)
             {
                 body.AppendLine("</ul>");
-            }
-
-            foreach (var entry in entries)
-            {
-                body.Append("<section class=\"scenario\" id=\"")
-                    .Append(Encode(entry.Anchor))
-                    .AppendLine("\">");
-                body.Append("<h2>")
-                    .Append(Encode(entry.Title))
-                    .AppendLine("</h2>");
-                body.Append("<p class=\"meta\">")
-                    .Append(entry.PartCount.ToString(CultureInfo.InvariantCulture))
-                    .Append(" sections · ")
-                    .Append(entry.StepCount.ToString(CultureInfo.InvariantCulture))
-                    .AppendLine(" steps</p>");
-                body.Append(PlaywrightWalkthroughPlayer.RenderArticles(entry.Manifest, entry.RelativeDirectory));
-                body.AppendLine("</section>");
             }
         }
 
@@ -256,8 +227,6 @@ public static class PlaywrightWalkthroughCatalog
                 a { color: #1d4b6e; }
                 ul { padding-left: 1.25rem; }
                 li { margin: .45rem 0; overflow-wrap: break-word; }
-                section.scenario { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #d4cbb8; scroll-margin-top: 1rem; }
-                section.scenario img { display: block; width: 100%; height: auto; background: #fff; border: 1px solid #d4cbb8; margin: .75rem 0 1.5rem; }
                 .meta { color: #4a4a4a; }
               </style>
             </head>

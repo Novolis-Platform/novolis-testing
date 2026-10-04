@@ -11,6 +11,6 @@ public sealed record PlaywrightWalkthroughCatalogEntry(
     DateTimeOffset RecordedAtUtc,
     PlaywrightWalkthroughManifest Manifest)
 {
-    /// <summary>In-page anchor for the overview document.</summary>
-    public string Anchor => PlaywrightWalkthroughCatalog.AnchorOf(ClassName, TestName);
+    /// <summary>Relative path from the catalog root to this recording's portable HTML.</summary>
+    public string HtmlHref => RelativeDirectory.Replace('\\', '/') + "/walkthrough.html";
 }

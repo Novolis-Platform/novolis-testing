@@ -4,25 +4,43 @@ using System.Text;
 
 namespace Novolis.Testing.Playwright;
 
-/// <summary>Builds a static HTML document for one walkthrough. JavaScript only advances steps.</summary>
+/// <summary>
+/// Builds a static HTML document for one scenario.
+/// JavaScript only advances steps. The document stays readable without it.
+/// </summary>
 public static class PlaywrightWalkthroughPlayer
 {
     /// <summary>Default hold when the manifest omits a usable duration.</summary>
     public const int DefaultFrameHoldMilliseconds = 4000;
 
-    /// <summary>Renders a self-contained recording that can be read without JavaScript.</summary>
+    /// <summary>Renders a recording. Frame paths stay relative unless a resolver inlines them.</summary>
     /// <param name="manifest">Walkthrough written by <see cref="PlaywrightSession"/>.</param>
     /// <returns>HTML document.</returns>
     public static string Render(PlaywrightWalkthroughManifest manifest) =>
-        Render(manifest, indexHref: null);
+        Render(manifest, indexHref: null, resolveAsset: null);
 
-    /// <summary>Renders a self-contained recording that can be read without JavaScript.</summary>
+    /// <summary>Renders a recording with a crumb back to the collection index.</summary>
     /// <param name="manifest">Walkthrough written by <see cref="PlaywrightSession"/>.</param>
     /// <param name="indexHref">Optional relative link back to the collection index.</param>
     /// <returns>HTML document.</returns>
-    public static string Render(PlaywrightWalkthroughManifest manifest, string? indexHref)
+    public static string Render(PlaywrightWalkthroughManifest manifest, string? indexHref) =>
+        Render(manifest, indexHref, resolveAsset: null);
+
+    /// <summary>
+    /// Renders a recording. <paramref name="resolveAsset"/> compiles frame paths (data URIs or relative files).
+    /// The renderer does not read the filesystem.
+    /// </summary>
+    /// <param name="manifest">Walkthrough written by <see cref="PlaywrightSession"/>.</param>
+    /// <param name="indexHref">Optional relative link back to the collection index.</param>
+    /// <param name="resolveAsset">Maps a manifest asset path to an <c>img</c> or media <c>src</c>.</param>
+    /// <returns>HTML document.</returns>
+    public static string Render(
+        PlaywrightWalkthroughManifest manifest,
+        string? indexHref,
+        Func<string, string>? resolveAsset)
     {
         ArgumentNullException.ThrowIfNull(manifest);
+        resolveAsset ??= static path => path.Replace('\\', '/');
         var hold = manifest.FrameHoldMilliseconds > 0
             ? manifest.FrameHoldMilliseconds
             : DefaultFrameHoldMilliseconds;
@@ -52,28 +70,30 @@ public static class PlaywrightWalkthroughPlayer
                 @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
                 aside { background: #efe8da; border-right: 1px solid #d4cbb8; padding: 1.25rem 1.1rem 6rem; overflow: auto; }
                 main { padding: 1.25rem 1.5rem 6rem; max-width: 52rem; }
-                h1, h2, h3, .step-title { font-family: Segoe UI, sans-serif; font-weight: 650; letter-spacing: 0; text-transform: none; overflow-wrap: break-word; }
+                h1, h2, .step-title, summary { font-family: Segoe UI, sans-serif; font-weight: 650; letter-spacing: 0; text-transform: none; overflow-wrap: break-word; }
                 h1 { font-size: 1.65rem; margin: 0 0 .35rem; }
-                h2 { font-size: 1.05rem; margin: 1.2rem 0 .4rem; }
-                h3 { font-size: .95rem; margin: .85rem 0 .3rem; font-weight: 600; color: #3d3d3d; }
+                h2, .step-title { font-size: 1.15rem; margin: 0 0 .4rem; }
                 .meta, .crumb { font-family: Segoe UI, sans-serif; color: #4a4a4a; margin: 0 0 .85rem; }
                 .crumb a { color: #1d4b6e; }
-                .part-label { font-family: Segoe UI, sans-serif; font-size: .85rem; color: #5a4a32; margin: 0 0 .25rem; letter-spacing: 0; text-transform: none; }
                 .narration { background: #fff8ea; border: 1px solid #d8c7a2; padding: .75rem .9rem; margin: 0 0 1rem; }
                 .outline { list-style: none; margin: 0; padding: 0; }
                 .outline ol { list-style: none; margin: 0 0 .35rem; padding-left: 1.15rem; }
-                .outline li { margin: .35rem 0; overflow-wrap: break-word; word-spacing: normal; }
-                .section-heading { font-family: Segoe UI, sans-serif; font-weight: 650; margin: .55rem 0 .2rem; letter-spacing: 0; text-transform: none; overflow-wrap: break-word; }
+                .outline li { margin: .35rem 0; overflow-wrap: break-word; }
                 .outline a { color: #1d4b6e; text-decoration: none; }
                 .outline a:hover, .outline a[aria-current="true"] { text-decoration: underline; }
-                article.step { margin: 2.25rem 0 0; padding-top: .25rem; scroll-margin-top: 5rem; }
+                .outline summary { cursor: pointer; margin: .45rem 0 .2rem; }
+                details.section { margin: 1.5rem 0 0; padding-left: .15rem; }
+                details.section > summary { cursor: pointer; font-size: 1.05rem; margin: 0 0 .65rem; }
+                .section-indent { margin-left: 1.15rem; }
+                article.step { margin: 1.25rem 0 0; scroll-margin-top: 5rem; }
                 article.step img { display: block; width: 100%; height: auto; background: #fff; border: 1px solid #d4cbb8; }
+                .kind-badge { display: inline-block; font-family: Segoe UI, sans-serif; font-size: .72rem; font-weight: 650; margin-left: .45rem; padding: .08rem .4rem; border: 1px solid currentColor; vertical-align: middle; }
+                .kind-badge.deviated { color: #8a4b12; }
+                .kind-badge.planned { color: #2f5d2f; }
+                .kind-badge.closed { color: #555; }
                 .bar { position: sticky; bottom: 0; display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; padding: .65rem 1rem; background: #efe8da; border-top: 1px solid #d4cbb8; font-family: Segoe UI, sans-serif; }
                 button { background: #fff; color: #1a1a1a; border: 1px solid #8a7b62; padding: .4rem .75rem; cursor: pointer; }
                 #play { background: #3d3224; border-color: #3d3224; color: #f7f4ee; }
-                .kind-line.deviated, h3.deviated { color: #8a4b12; }
-                .kind-line.planned, h3.planned { color: #2f5d2f; }
-                .kind-line.closed, h3.closed { color: #555; }
                 .raw { margin-top: 1.25rem; color: #555; }
                 .raw video { width: min(100%, 720px); margin-top: .5rem; }
               </style>
@@ -89,7 +109,7 @@ public static class PlaywrightWalkthroughPlayer
                   __INDEX__
                   <h1>__TITLE__</h1>
                   <p class="meta">__INTRO__</p>
-                  __ARTICLES__
+                  __SCENARIO__
                   __RAW__
                 </main>
               </div>
@@ -108,9 +128,17 @@ public static class PlaywrightWalkthroughPlayer
                 let index = 0;
                 let timer = 0;
                 let running = false;
+                function reveal(article) {
+                  let node = article.parentElement;
+                  while (node) {
+                    if (node.tagName === "DETAILS") node.open = true;
+                    node = node.parentElement;
+                  }
+                }
                 function show(i) {
                   if (!articles.length) return;
                   index = (i + articles.length) % articles.length;
+                  reveal(articles[index]);
                   articles[index].scrollIntoView({ behavior: "smooth", block: "start" });
                   progress.textContent = "Step " + (index + 1) + " of " + articles.length;
                   for (const link of links) {
@@ -152,7 +180,7 @@ public static class PlaywrightWalkthroughPlayer
                 (hold / 1000.0).ToString("0.#", CultureInfo.InvariantCulture) +
                 "s per step when playing.",
                 StringComparison.Ordinal)
-            .Replace("__ARTICLES__", BuildArticles(manifest, framePrefix: null), StringComparison.Ordinal)
+            .Replace("__SCENARIO__", BuildScenario(manifest, resolveAsset), StringComparison.Ordinal)
             .Replace("__RAW__", raw, StringComparison.Ordinal)
             .Replace("__HOLD__", hold.ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal);
     }
@@ -165,22 +193,26 @@ public static class PlaywrightWalkthroughPlayer
         {
             if (op.Action == "open")
             {
-                var kind = string.IsNullOrWhiteSpace(op.Kind) ? string.Empty : " " + Encode(op.Kind);
-                text.Append("<li class=\"section")
-                    .Append(kind)
-                    .Append("\">");
+                text.Append("<li class=\"section\">");
                 if (!string.IsNullOrWhiteSpace(op.Heading))
                 {
-                    text.Append("<div class=\"section-heading\">")
+                    text.Append("<details open><summary>")
                         .Append(Encode(op.Heading))
-                        .Append("</div>");
+                        .Append(KindBadge(op.Kind))
+                        .Append("</summary>");
                 }
 
                 text.Append("<ol>");
             }
             else if (op.Action == "close")
             {
-                text.Append("</ol></li>");
+                text.Append("</ol>");
+                if (!string.IsNullOrWhiteSpace(op.Heading))
+                {
+                    text.Append("</details>");
+                }
+
+                text.Append("</li>");
             }
             else if (op.Step is { } step)
             {
@@ -196,71 +228,83 @@ public static class PlaywrightWalkthroughPlayer
         return text.ToString();
     }
 
-    /// <summary>Renders step articles for embedding in the collection overview.</summary>
-    public static string RenderArticles(PlaywrightWalkthroughManifest manifest, string? framePrefix) =>
-        BuildArticles(manifest, framePrefix);
-
-    private static string BuildArticles(PlaywrightWalkthroughManifest manifest, string? framePrefix)
+    private static string BuildScenario(PlaywrightWalkthroughManifest manifest, Func<string, string> resolveAsset)
     {
         var text = new StringBuilder();
-        foreach (var step in manifest.Steps)
+        foreach (var op in PlaywrightWalkthroughOutline.Build(manifest.Steps))
         {
-            var kindLine = step.Kind switch
+            if (op.Action == "open")
             {
-                "deviated" => "This flow departed from the usual clock.",
-                "planned" => "This day followed the usual clock.",
-                "closed" => "The shop was shut. Not a gap.",
-                _ => string.Empty,
-            };
-            var path = PlaywrightWalkthroughOutline.PathOf(step);
-            text.Append("<article class=\"step\" id=\"step-")
-                .Append(step.Index.ToString(CultureInfo.InvariantCulture))
-                .Append("\" style=\"padding-left:")
-                .Append((path.Count * 1.15).ToString("0.##", CultureInfo.InvariantCulture))
-                .Append("rem\">");
-            foreach (var heading in path.Where(heading => !string.IsNullOrWhiteSpace(heading)))
-            {
-                text.Append("<p class=\"part-label\">").Append(Encode(heading)).Append("</p>");
-            }
-
-            text.Append("<h2 class=\"step-title\">")
-                .Append(step.Index.ToString(CultureInfo.InvariantCulture))
-                .Append(". ")
-                .Append(Encode(step.Name))
-                .Append("</h2>");
-            if (!string.IsNullOrWhiteSpace(kindLine))
-            {
-                text.Append("<p class=\"kind-line ")
-                    .Append(Encode(step.Kind))
-                    .Append("\">")
-                    .Append(Encode(kindLine))
-                    .Append("</p>");
-            }
-
-            if (!string.IsNullOrWhiteSpace(step.Narration))
-            {
-                text.Append("<p class=\"narration\">").Append(Encode(step.Narration)).Append("</p>");
-            }
-
-            if (!string.IsNullOrWhiteSpace(step.FrameFile))
-            {
-                var frame = step.FrameFile.Replace('\\', '/');
-                if (!string.IsNullOrWhiteSpace(framePrefix))
+                if (string.IsNullOrWhiteSpace(op.Heading))
                 {
-                    frame = framePrefix.TrimEnd('/') + "/" + frame.TrimStart('/');
+                    text.Append("<div class=\"section-indent\">");
+                    continue;
                 }
 
-                text.Append("<img src=\"")
-                    .Append(Encode(frame))
-                    .Append("\" alt=\"")
-                    .Append(Encode(step.Name))
-                    .Append("\"/>");
+                text.Append("<details class=\"section\" open><summary>")
+                    .Append(Encode(op.Heading))
+                    .Append(KindBadge(op.Kind))
+                    .Append("</summary>");
             }
-
-            text.Append("</article>");
+            else if (op.Action == "close")
+            {
+                text.Append(string.IsNullOrWhiteSpace(op.Heading) ? "</div>" : "</details>");
+            }
+            else if (op.Step is { } step)
+            {
+                AppendStep(text, step, resolveAsset);
+            }
         }
 
         return text.ToString();
+    }
+
+    private static void AppendStep(
+        StringBuilder text,
+        PlaywrightWalkthroughStep step,
+        Func<string, string> resolveAsset)
+    {
+        text.Append("<article class=\"step\" id=\"step-")
+            .Append(step.Index.ToString(CultureInfo.InvariantCulture))
+            .Append("\">");
+        text.Append("<h2 class=\"step-title\">")
+            .Append(step.Index.ToString(CultureInfo.InvariantCulture))
+            .Append(". ")
+            .Append(Encode(step.Name))
+            .Append("</h2>");
+        if (!string.IsNullOrWhiteSpace(step.Narration))
+        {
+            text.Append("<p class=\"narration\">").Append(Encode(step.Narration)).Append("</p>");
+        }
+
+        if (!string.IsNullOrWhiteSpace(step.FrameFile))
+        {
+            var source = resolveAsset(step.FrameFile.Replace('\\', '/'));
+            text.Append("<img src=\"")
+                .Append(Encode(source))
+                .Append("\" alt=\"")
+                .Append(Encode(step.Name))
+                .Append("\"/>");
+        }
+
+        text.Append("</article>");
+    }
+
+    private static string KindBadge(string? kind)
+    {
+        if (string.IsNullOrWhiteSpace(kind))
+        {
+            return string.Empty;
+        }
+
+        var label = kind switch
+        {
+            "deviated" => "Deviated",
+            "planned" => "Planned",
+            "closed" => "Closed",
+            _ => kind,
+        };
+        return "<span class=\"kind-badge " + Encode(kind) + "\">" + Encode(label) + "</span>";
     }
 
     private static string Encode(string? value) => WebUtility.HtmlEncode(value ?? string.Empty);

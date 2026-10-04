@@ -22,6 +22,7 @@
     <ProjectReference Include="..\..\src\Novolis.Testing.TestServer\Novolis.Testing.TestServer.csproj" />
     <ProjectReference Include="..\..\src\Novolis.Testing.TUnit\Novolis.Testing.TUnit.csproj" />
     <ProjectReference Include="..\..\src\Novolis.Testing.Coverage\Novolis.Testing.Coverage.csproj" />
+    <LibraryReference Include="Novolis.CodeGen.Reflection.Dump" />
     <LibraryReference Include="Novolis.Messaging.ServiceBus.Abstractions" />
     <LibraryReference Include="Novolis.Messaging.ServiceBus.Client" />
     <LibraryReference Include="Novolis.Messaging.ServiceBus.Primitives" />

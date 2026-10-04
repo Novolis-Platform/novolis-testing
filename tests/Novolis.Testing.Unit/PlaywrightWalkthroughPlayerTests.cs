@@ -1,3 +1,4 @@
+using Novolis.CodeGen.Reflection.Dump;
 using Novolis.Testing.Playwright;
 
 namespace Novolis.Testing.Unit;
@@ -5,28 +6,44 @@ namespace Novolis.Testing.Unit;
 public sealed class PlaywrightWalkthroughPlayerTests
 {
     [Test]
+    public async Task Dump_writes_the_door_sample_as_csharp()
+    {
+        var source = PlaywrightWalkthroughDoorSample.Create().DumpVar();
+        await Assert.That(source).Contains("Hours door");
+        await Assert.That(source).Contains("Open door");
+        await Assert.That(source).Contains("frames/01-Open_door.png");
+        await Assert.That(source).DoesNotContain("base64");
+    }
+
+    [Test]
     public async Task Render_groups_parts_and_shows_narration_not_a_realtime_video()
     {
-        var html = PlaywrightWalkthroughPlayer.Render(new PlaywrightWalkthroughManifest(
-            "Game shop <month>",
-            "http://localhost:1/",
-            @"d:\artifacts",
-            RawCaptureFile: null,
-            TraceFile: null,
-            FrameHoldMilliseconds: 4000,
-            [
-                new PlaywrightWalkthroughStep(1, "Platform", "Sign in", "The platform system opens Hours.", "frames/01.png", DateTimeOffset.UnixEpoch),
-                new PlaywrightWalkthroughStep(2, "Shop roster", "Add clerk", "The customer adds a clerk.", "frames/02.png", DateTimeOffset.UnixEpoch),
-            ]));
+        var html = PlaywrightWalkthroughPlayer.Render(PlaywrightWalkthroughDoorSample.Create());
 
         await Assert.That(html).Contains("Read down the page, or use Play / Next.");
-        await Assert.That(html).Contains("2 sections · 2 steps");
-        await Assert.That(html).Contains("The platform system opens Hours.");
-        await Assert.That(html).Contains("Game shop &lt;month&gt;");
+        await Assert.That(html).Contains("1 sections · 2 steps");
+        await Assert.That(html).Contains("The week is behind the door.");
+        await Assert.That(html).Contains("Hours door");
         await Assert.That(html).Contains("Play scenario");
-        await Assert.That(html).Contains("<a href=\"#step-1\">Sign in</a>");
+        await Assert.That(html).Contains("<a href=\"#step-1\">Open door</a>");
+        await Assert.That(html).Contains("<details class=\"section\" open><summary>1. Sign in</summary>");
+        await Assert.That(html).Contains("<details class=\"section\" open><summary>Set usual hours</summary>");
+        await Assert.That(html).Contains("src=\"frames/01-Open_door.png\"");
         await Assert.That(html).DoesNotContain("text-transform: uppercase");
         await Assert.That(html).DoesNotContain("<video autoplay");
+    }
+
+    [Test]
+    public async Task Render_compiles_frames_through_resolveAsset()
+    {
+        var html = PlaywrightWalkthroughPlayer.Render(
+            PlaywrightWalkthroughDoorSample.Create(),
+            indexHref: "../index.html",
+            resolveAsset: path => "data:image/png;base64,abc" + path.Length.ToString(System.Globalization.CultureInfo.InvariantCulture));
+
+        await Assert.That(html).Contains("data:image/png;base64,");
+        await Assert.That(html).Contains("All walkthroughs");
+        await Assert.That(html).DoesNotContain("src=\"frames/01-Open_door.png\"");
     }
 
     [Test]
@@ -44,10 +61,11 @@ public sealed class PlaywrightWalkthroughPlayerTests
         await Assert.That(html).Contains("Raw capture (real-time, usually too fast to read)");
         await Assert.That(html).Contains("src=\"Ada.webm\"");
         await Assert.That(html).DoesNotContain("<video autoplay");
+        await Assert.That(html).DoesNotContain("trace.zip");
     }
 
     [Test]
-    public async Task Render_nests_deviated_flow_under_its_parent()
+    public async Task Render_puts_kind_on_the_section_not_every_step()
     {
         var html = PlaywrightWalkthroughPlayer.Render(new PlaywrightWalkthroughManifest(
             "Jamie week",
@@ -83,9 +101,10 @@ public sealed class PlaywrightWalkthroughPlayerTests
                     Sections: ["Exceptions", "Thursday 1 October · Changed", "I worked different hours"]),
             ]));
 
-        await Assert.That(html).Contains("This flow departed from the usual clock.");
-        await Assert.That(html).Contains("section-heading\">Thursday 1 October");
-        await Assert.That(html).Contains("section-heading\">I worked different hours</div>");
-        await Assert.That(html).Contains("section-heading\">Set usual hours</div>");
+        await Assert.That(html).Contains("kind-badge deviated\">Deviated</span>");
+        await Assert.That(html).Contains("Thursday 1 October");
+        await Assert.That(html).Contains("<summary>I worked different hours");
+        await Assert.That(html).Contains("<summary>Set usual hours</summary>");
+        await Assert.That(html).DoesNotContain("This flow departed from the usual clock.");
     }
 }

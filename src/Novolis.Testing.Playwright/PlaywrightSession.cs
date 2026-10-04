@@ -201,7 +201,12 @@ public sealed class PlaywrightSession
         {
             File.WriteAllText(ManifestPath, JsonSerializer.Serialize(manifest, JsonOptions));
             File.WriteAllText(MarkdownPath, PlaywrightWalkthroughMarkdown.Render(manifest, indexHref));
-            File.WriteAllText(PlayerPath, PlaywrightWalkthroughPlayer.Render(manifest, htmlIndexHref));
+            File.WriteAllText(
+                PlayerPath,
+                PlaywrightWalkthroughPlayer.Render(
+                    manifest,
+                    htmlIndexHref,
+                    relative => PlaywrightWalkthroughAssets.ToDataUriOrPath(ArtifactDirectory, relative)));
             PlaywrightWalkthroughCatalog.Refresh(catalogRoot);
         });
     }
