@@ -192,15 +192,18 @@ public sealed class PlaywrightSession
             traceFile,
             options.FrameHoldMilliseconds,
             steps);
-        await File.WriteAllTextAsync(ManifestPath, JsonSerializer.Serialize(manifest, JsonOptions));
         var catalogRoot = PlaywrightArtifactStore.CatalogRootFrom(ArtifactDirectory);
         var indexHref = Path.GetRelativePath(ArtifactDirectory, Path.Combine(catalogRoot, PlaywrightWalkthroughCatalog.MarkdownFileName))
             .Replace('\\', '/');
         var htmlIndexHref = Path.GetRelativePath(ArtifactDirectory, Path.Combine(catalogRoot, PlaywrightWalkthroughCatalog.HtmlFileName))
             .Replace('\\', '/');
-        await File.WriteAllTextAsync(MarkdownPath, PlaywrightWalkthroughMarkdown.Render(manifest, indexHref));
-        await File.WriteAllTextAsync(PlayerPath, PlaywrightWalkthroughPlayer.Render(manifest, htmlIndexHref));
-        PlaywrightWalkthroughCatalog.Refresh(catalogRoot);
+        PlaywrightWalkthroughCatalog.Synchronize(() =>
+        {
+            File.WriteAllText(ManifestPath, JsonSerializer.Serialize(manifest, JsonOptions));
+            File.WriteAllText(MarkdownPath, PlaywrightWalkthroughMarkdown.Render(manifest, indexHref));
+            File.WriteAllText(PlayerPath, PlaywrightWalkthroughPlayer.Render(manifest, htmlIndexHref));
+            PlaywrightWalkthroughCatalog.Refresh(catalogRoot);
+        });
     }
 
     private async Task<string?> CopyRawCaptureAsync()

@@ -8,6 +8,8 @@ namespace Novolis.Testing.Playwright;
 /// <summary>Rewrites recordings and writes a collection index that links every latest walkthrough.</summary>
 public static class PlaywrightWalkthroughCatalog
 {
+    private static readonly object Gate = new();
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -29,6 +31,39 @@ public static class PlaywrightWalkthroughCatalog
     public static IReadOnlyList<PlaywrightWalkthroughCatalogEntry> Refresh(string root)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(root);
+        lock (Gate)
+        {
+            return RefreshCore(root);
+        }
+    }
+
+    /// <summary>Runs <paramref name="action"/> while no other catalog write is in flight.</summary>
+    public static void Synchronize(Action action)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+        lock (Gate)
+        {
+            action();
+        }
+    }
+
+    /// <summary>Stable in-page id for a class and test name.</summary>
+    public static string AnchorOf(string className, string testName)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(className);
+        ArgumentException.ThrowIfNullOrWhiteSpace(testName);
+        var raw = className + "-" + testName;
+        var text = new StringBuilder(raw.Length);
+        foreach (var c in raw)
+        {
+            text.Append(char.IsAsciiLetterOrDigit(c) ? char.ToLowerInvariant(c) : '-');
+        }
+
+        return text.ToString().Trim('-');
+    }
+
+    private static IReadOnlyList<PlaywrightWalkthroughCatalogEntry> RefreshCore(string root)
+    {
         Directory.CreateDirectory(root);
         var latest = new Dictionary<string, PlaywrightWalkthroughCatalogEntry>(StringComparer.OrdinalIgnoreCase);
         foreach (var jsonPath in Directory.EnumerateFiles(root, "walkthrough.json", SearchOption.AllDirectories))
@@ -43,10 +78,14 @@ public static class PlaywrightWalkthroughCatalog
             try
             {
                 manifest = JsonSerializer.Deserialize<PlaywrightWalkthroughManifest>(
-                    File.ReadAllText(jsonPath),
+                    ReadShared(jsonPath),
                     JsonOptions);
             }
             catch (JsonException)
+            {
+                continue;
+            }
+            catch (IOException)
             {
                 continue;
             }
@@ -81,7 +120,8 @@ public static class PlaywrightWalkthroughCatalog
                 PlaywrightWalkthroughOutline.SectionCount(manifest.Steps),
                 manifest.Steps.Count,
                 relative,
-                recorded);
+                recorded,
+                manifest);
             if (!latest.TryGetValue(key, out var existing) || entry.RecordedAtUtc >= existing.RecordedAtUtc)
             {
                 latest[key] = entry;
@@ -143,7 +183,7 @@ public static class PlaywrightWalkthroughCatalog
         ArgumentNullException.ThrowIfNull(entries);
         var body = new StringBuilder();
         body.AppendLine("<h1>Walkthroughs</h1>");
-        body.AppendLine("<p>Latest recording of each scenario. Markdown is the story. HTML is the same pages with Play / Next.</p>");
+        body.AppendLine("<p>Click a scenario. It stays on this page. Frames load from the same folder as this file.</p>");
         if (entries.Count == 0)
         {
             body.AppendLine("<p>No walkthroughs have been written yet.</p>");
@@ -167,15 +207,11 @@ public static class PlaywrightWalkthroughCatalog
                     lastClass = entry.ClassName;
                 }
 
-                var md = Encode($"{entry.RelativeDirectory}/walkthrough.md");
-                var html = Encode($"{entry.RelativeDirectory}/walkthrough.html");
-                body.Append("<li><a href=\"")
-                    .Append(md)
+                body.Append("<li><a href=\"#")
+                    .Append(Encode(entry.Anchor))
                     .Append("\">")
                     .Append(Encode(entry.Title))
-                    .Append("</a> · <a href=\"")
-                    .Append(html)
-                    .Append("\">Play</a> · ")
+                    .Append("</a> · ")
                     .Append(entry.PartCount.ToString(CultureInfo.InvariantCulture))
                     .Append(" sections · ")
                     .Append(entry.StepCount.ToString(CultureInfo.InvariantCulture))
@@ -185,6 +221,23 @@ public static class PlaywrightWalkthroughCatalog
             if (lastClass is not null)
             {
                 body.AppendLine("</ul>");
+            }
+
+            foreach (var entry in entries)
+            {
+                body.Append("<section class=\"scenario\" id=\"")
+                    .Append(Encode(entry.Anchor))
+                    .AppendLine("\">");
+                body.Append("<h2>")
+                    .Append(Encode(entry.Title))
+                    .AppendLine("</h2>");
+                body.Append("<p class=\"meta\">")
+                    .Append(entry.PartCount.ToString(CultureInfo.InvariantCulture))
+                    .Append(" sections · ")
+                    .Append(entry.StepCount.ToString(CultureInfo.InvariantCulture))
+                    .AppendLine(" steps</p>");
+                body.Append(PlaywrightWalkthroughPlayer.RenderArticles(entry.Manifest, entry.RelativeDirectory));
+                body.AppendLine("</section>");
             }
         }
 
@@ -203,6 +256,9 @@ public static class PlaywrightWalkthroughCatalog
                 a { color: #1d4b6e; }
                 ul { padding-left: 1.25rem; }
                 li { margin: .45rem 0; overflow-wrap: break-word; }
+                section.scenario { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #d4cbb8; scroll-margin-top: 1rem; }
+                section.scenario img { display: block; width: 100%; height: auto; background: #fff; border: 1px solid #d4cbb8; margin: .75rem 0 1.5rem; }
+                .meta { color: #4a4a4a; }
               </style>
             </head>
             <body>
@@ -211,6 +267,13 @@ public static class PlaywrightWalkthroughCatalog
             </html>
             """;
         return template.Replace("__BODY__", body.ToString(), StringComparison.Ordinal);
+    }
+
+    private static string ReadShared(string path)
+    {
+        using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+        using var reader = new StreamReader(stream);
+        return reader.ReadToEnd();
     }
 
     private static string ClassNameOf(string relative)

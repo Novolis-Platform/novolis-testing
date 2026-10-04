@@ -28,6 +28,10 @@ public sealed class PlaywrightWalkthroughCatalogTests
         await Assert.That(index).Contains("[Play](");
         await Assert.That(index).DoesNotContain("20260101T000000000");
         await Assert.That(html).Contains("Game shop");
+        await Assert.That(html).Contains("href=\"#hoursgamemonthscenariotests-game-shop\"");
+        await Assert.That(html).Contains("id=\"hoursgamemonthscenariotests-game-shop\"");
+        await Assert.That(html).Contains("Set Saturday as a working day");
+        await Assert.That(html).Contains($"{Path.GetRelativePath(root, newer).Replace('\\', '/')}/frames/01.png".Replace('\\', '/'));
         await Assert.That(await File.ReadAllTextAsync(Path.Combine(newer, "walkthrough.html")))
             .Contains("Set Saturday as a working day");
         await Assert.That(story).Contains("Set Saturday as a working day");

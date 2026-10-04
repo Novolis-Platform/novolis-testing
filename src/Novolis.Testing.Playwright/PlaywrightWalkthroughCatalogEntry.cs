@@ -8,4 +8,9 @@ public sealed record PlaywrightWalkthroughCatalogEntry(
     int PartCount,
     int StepCount,
     string RelativeDirectory,
-    DateTimeOffset RecordedAtUtc);
+    DateTimeOffset RecordedAtUtc,
+    PlaywrightWalkthroughManifest Manifest)
+{
+    /// <summary>In-page anchor for the overview document.</summary>
+    public string Anchor => PlaywrightWalkthroughCatalog.AnchorOf(ClassName, TestName);
+}

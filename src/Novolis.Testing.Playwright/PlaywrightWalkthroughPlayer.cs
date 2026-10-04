@@ -152,7 +152,7 @@ public static class PlaywrightWalkthroughPlayer
                 (hold / 1000.0).ToString("0.#", CultureInfo.InvariantCulture) +
                 "s per step when playing.",
                 StringComparison.Ordinal)
-            .Replace("__ARTICLES__", BuildArticles(manifest), StringComparison.Ordinal)
+            .Replace("__ARTICLES__", BuildArticles(manifest, framePrefix: null), StringComparison.Ordinal)
             .Replace("__RAW__", raw, StringComparison.Ordinal)
             .Replace("__HOLD__", hold.ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal);
     }
@@ -196,7 +196,11 @@ public static class PlaywrightWalkthroughPlayer
         return text.ToString();
     }
 
-    private static string BuildArticles(PlaywrightWalkthroughManifest manifest)
+    /// <summary>Renders step articles for embedding in the collection overview.</summary>
+    public static string RenderArticles(PlaywrightWalkthroughManifest manifest, string? framePrefix) =>
+        BuildArticles(manifest, framePrefix);
+
+    private static string BuildArticles(PlaywrightWalkthroughManifest manifest, string? framePrefix)
     {
         var text = new StringBuilder();
         foreach (var step in manifest.Steps)
@@ -240,8 +244,14 @@ public static class PlaywrightWalkthroughPlayer
 
             if (!string.IsNullOrWhiteSpace(step.FrameFile))
             {
+                var frame = step.FrameFile.Replace('\\', '/');
+                if (!string.IsNullOrWhiteSpace(framePrefix))
+                {
+                    frame = framePrefix.TrimEnd('/') + "/" + frame.TrimStart('/');
+                }
+
                 text.Append("<img src=\"")
-                    .Append(Encode(step.FrameFile.Replace('\\', '/')))
+                    .Append(Encode(frame))
                     .Append("\" alt=\"")
                     .Append(Encode(step.Name))
                     .Append("\"/>");
