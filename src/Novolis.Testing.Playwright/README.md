@@ -6,13 +6,14 @@
 
 # Novolis.Testing.Playwright
 
-Walkthrough storage on top of **[TUnit.Playwright](https://www.nuget.org/packages/TUnit.Playwright)** `PageTest`. TUnit owns the browser lifecycle. This package writes a watchable record of each test:
+Walkthrough storage on top of **[TUnit.Playwright](https://www.nuget.org/packages/TUnit.Playwright)** `PageTest`. TUnit owns the browser lifecycle. This package writes a watchable **recording** of each test:
 
-- `{TestName}.webm` — TUnit.Playwright screen recording (`RecordVideoDir` on the context; copied to `video.webm` when the file is already finalized)
+- `walkthrough.html` — HTML recording with a part outline, narration, and stills (4s hold, starts paused)
 - `frames/NN-step.png` — one full-page shot per `StepAsync`
-- `walkthrough.json` — step timeline
-- `walkthrough.html` — local player for the video and frames
+- `walkthrough.json` — part + step timeline
 - `trace.zip` — Playwright trace (optional, on by default)
+
+Real-time WebM is off by default. Playwright finishes a UI test in seconds, so a `<video>` of that run is unreadable. Set `RecordVideo = true` only if you want the raw capture tucked under “Raw capture” in the player.
 
 This package does not start the application under test. Hours (and other hosts) start their own API and Blazor surfaces, then pass `BaseUrl`.
 
@@ -43,12 +44,30 @@ public sealed class DoorTests : PlaywrightTestBase
     [Test]
     public async Task Sign_in_reaches_the_week()
     {
-        await Session.StepAsync("Open door", page => page.GotoAsync("/"));
-        await Session.StepAsync("Enter", async page =>
+        Session.BeginPart("1. Sign in");
+        await Session.StepAsync("Open door", "The week is behind the door.", page => page.GotoAsync("/"));
+        using (Session.BeginFlow("Set usual hours"))
         {
-            await page.GetByLabel("Login").FillAsync("ada");
-            await page.GetByRole(AriaRole.Button, new() { Name = "Enter this week" }).ClickAsync();
-        });
+            await Session.StepAsync("Open My hours", "The usual clock is a form.", page =>
+                page.GetByRole(AriaRole.Link, new() { Name = "My hours" }).ClickAsync());
+            await Session.StepAsync("Enter 09:00–18:00", "Start and end, then save.", async page =>
+            {
+                await page.GetByLabel("Usual start").FillAsync("09:00");
+                await page.GetByLabel("Usual end").FillAsync("18:00");
+            });
+        }
+
+        using (Session.BeginFlow("Thursday · Changed", PlaywrightWalkthroughFlowKind.Deviated))
+        {
+            using (Session.BeginFlow("I worked different hours", PlaywrightWalkthroughFlowKind.Deviated))
+            {
+                await Session.StepAsync("Type 10:00–18:00", "Late, same length.", async page =>
+                {
+                    await page.GetByLabel("Start").FillAsync("10:00");
+                    await page.GetByLabel("End").FillAsync("18:00");
+                });
+            }
+        }
     }
 }
 ```

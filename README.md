@@ -72,7 +72,7 @@ TUnit-first test helpers for Novolis library development.
 | `Novolis.Testing.TestServer` | In-process test server helpers |
 | `Novolis.Testing.ServiceBus` | AlmostServiceBus TUnit host (Novolis Service Bus Client) |
 | `Novolis.Testing.Appium` | TUnit Appium sessions for Android and Windows MAUI hosts |
-| `Novolis.Testing.Playwright` | Walkthrough video, frames, and HTML on `TUnit.Playwright` `PageTest` |
+| `Novolis.Testing.Playwright` | HTML step recording (frames + `walkthrough.html`) on `TUnit.Playwright` `PageTest` |
 
 ## Install
 

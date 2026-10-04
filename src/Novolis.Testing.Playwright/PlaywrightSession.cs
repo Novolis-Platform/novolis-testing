@@ -16,6 +16,7 @@ public sealed class PlaywrightSession
     };
 
     private readonly List<PlaywrightWalkthroughStep> steps = [];
+    private readonly Stack<(string Name, PlaywrightWalkthroughFlowKind Kind)> flows = new();
     private readonly PlaywrightSessionOptions options;
 
     /// <summary>Attaches to a TUnit-owned page.</summary>
@@ -36,7 +37,7 @@ public sealed class PlaywrightSession
     /// <summary>Active page for the test.</summary>
     public IPage Page { get; }
 
-    /// <summary>Folder that receives video, frames, and the walkthrough manifest.</summary>
+    /// <summary>Folder that receives frames and the walkthrough recording.</summary>
     public string ArtifactDirectory { get; }
 
     /// <summary>Absolute walkthrough JSON path after <see cref="FlushAsync"/>.</summary>
@@ -48,24 +49,92 @@ public sealed class PlaywrightSession
     /// <summary>Recorded steps captured so far.</summary>
     public IReadOnlyList<PlaywrightWalkthroughStep> Steps => steps;
 
+    /// <summary>Current scenario part. Steps inherit this until the next <see cref="BeginPart"/>.</summary>
+    public string CurrentPart { get; private set; } = "Scenario";
+
+    private string CurrentFlowName => flows.Count == 0 ? string.Empty : flows.Peek().Name;
+
+    private string CurrentFlowPath =>
+        flows.Count == 0
+            ? string.Empty
+            : string.Join(" · ", flows.Reverse().Select(flow => flow.Name));
+
+    private string CurrentKindWire =>
+        flows.Count == 0
+            ? string.Empty
+            : flows.Peek().Kind switch
+            {
+                PlaywrightWalkthroughFlowKind.Planned => "planned",
+                PlaywrightWalkthroughFlowKind.Deviated => "deviated",
+                PlaywrightWalkthroughFlowKind.Closed => "closed",
+                _ => string.Empty,
+            };
+
+    /// <summary>Starts a named part. Later steps belong to it until the next part.</summary>
+    /// <param name="name">Part title shown in the recording outline.</param>
+    public void BeginPart(string name)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        CurrentPart = name;
+    }
+
+    /// <summary>
+    /// Opens a nested flow. Steps taken before dispose inherit depth, path, and kind
+    /// so a Changed day or usual-hours save can show every screen, not one end frame.
+    /// Flows stack; dispose in reverse order.
+    /// </summary>
+    /// <param name="name">Outline heading for this nest.</param>
+    /// <param name="kind">Whether this nest followed the usual clock, left it, or was shut.</param>
+    /// <returns>Scope that pops the flow when disposed.</returns>
+    public PlaywrightWalkthroughFlow BeginFlow(
+        string name,
+        PlaywrightWalkthroughFlowKind kind = PlaywrightWalkthroughFlowKind.Default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        flows.Push((name, kind));
+        return new PlaywrightWalkthroughFlow(() =>
+        {
+            if (flows.Count > 0)
+            {
+                flows.Pop();
+            }
+        });
+    }
+
     /// <summary>
     /// Runs one named walkthrough step, then stores a PNG frame so the HTML player can replay it.
     /// </summary>
     /// <param name="name">Human-readable step title.</param>
     /// <param name="action">Work performed on <see cref="Page"/>.</param>
     /// <returns>A task that completes when the frame is written.</returns>
-    public async Task StepAsync(string name, Func<IPage, Task> action)
+    public Task StepAsync(string name, Func<IPage, Task> action) =>
+        StepAsync(name, string.Empty, action);
+
+    /// <summary>
+    /// Runs one named step with narration that the HTML recording shows beside the frame.
+    /// </summary>
+    /// <param name="name">Short step title.</param>
+    /// <param name="narration">Why this step exists in the scenario.</param>
+    /// <param name="action">Work performed on <see cref="Page"/>.</param>
+    /// <returns>A task that completes when the frame is written.</returns>
+    public async Task StepAsync(string name, string narration, Func<IPage, Task> action)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentNullException.ThrowIfNull(action);
         await action(Page);
-        await CaptureAsync(name);
+        await CaptureAsync(name, narration);
     }
 
     /// <summary>Stores a screenshot frame without performing extra page work.</summary>
     /// <param name="name">Human-readable step title.</param>
     /// <returns>A task that completes when the frame is written.</returns>
-    public async Task CaptureAsync(string name)
+    public Task CaptureAsync(string name) => CaptureAsync(name, string.Empty);
+
+    /// <summary>Stores a screenshot frame with narration.</summary>
+    /// <param name="name">Human-readable step title.</param>
+    /// <param name="narration">Why this step exists in the scenario.</param>
+    /// <returns>A task that completes when the frame is written.</returns>
+    public async Task CaptureAsync(string name, string narration)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         var index = steps.Count + 1;
@@ -76,18 +145,27 @@ public sealed class PlaywrightSession
             Path = path,
             FullPage = true,
         });
-        steps.Add(new PlaywrightWalkthroughStep(index, name, $"frames/{fileName}", DateTimeOffset.UtcNow));
+        steps.Add(new PlaywrightWalkthroughStep(
+            index,
+            CurrentPart,
+            name,
+            narration ?? string.Empty,
+            $"frames/{fileName}",
+            DateTimeOffset.UtcNow,
+            flows.Count,
+            CurrentFlowName,
+            CurrentFlowPath,
+            CurrentKindWire));
     }
 
     /// <summary>
-    /// Writes the walkthrough JSON and HTML player. Copies <c>video.webm</c> when Playwright has one.
+    /// Writes the walkthrough JSON and HTML recording. Optionally notes a raw WebM when one exists.
     /// Does not close the TUnit browser context.
     /// </summary>
     /// <returns>A task that completes when artifacts are flushed.</returns>
     public async Task FlushAsync()
     {
-        string? videoFile = await CopyVideoAsync();
-
+        var rawCapture = await CopyRawCaptureAsync();
         var traceFile = File.Exists(Path.Combine(ArtifactDirectory, "trace.zip"))
             ? "trace.zip"
             : null;
@@ -95,89 +173,41 @@ public sealed class PlaywrightSession
             options.WalkthroughTitle,
             options.BaseUrl?.AbsoluteUri,
             ArtifactDirectory,
-            videoFile,
+            rawCapture,
             traceFile,
+            options.FrameHoldMilliseconds,
             steps);
         await File.WriteAllTextAsync(ManifestPath, JsonSerializer.Serialize(manifest, JsonOptions));
-        await File.WriteAllTextAsync(PlayerPath, RenderPlayer(manifest));
+        await File.WriteAllTextAsync(PlayerPath, PlaywrightWalkthroughPlayer.Render(manifest));
     }
 
-    private async Task<string?> CopyVideoAsync()
+    private async Task<string?> CopyRawCaptureAsync()
     {
-        var destination = Path.Combine(ArtifactDirectory, "video.webm");
-        string? candidate = null;
+        if (!options.RecordVideo)
+        {
+            return null;
+        }
+
         try
         {
             var recorded = Page.Video is null ? null : await Page.Video.PathAsync();
-            if (IsUsableVideo(recorded))
+            if (IsUsableCapture(recorded))
             {
-                candidate = recorded;
+                return Path.GetFileName(recorded);
             }
         }
         catch (PlaywrightException)
         {
         }
 
-        if (candidate is null && Directory.Exists(ArtifactDirectory))
-        {
-            candidate = Directory.GetFiles(ArtifactDirectory, "*.webm")
-                .Where(IsUsableVideo)
-                .OrderByDescending(path => new FileInfo(path).Length)
-                .FirstOrDefault();
-        }
-
-        if (candidate is null)
-        {
-            if (!options.RecordVideo)
-            {
-                return null;
-            }
-
-            // TUnit.Playwright writes {TestName}.webm after it closes the context.
-            return PlaywrightArtifactStore.Sanitize(options.WalkthroughTitle) + ".webm";
-        }
-
-        if (!string.Equals(candidate, destination, StringComparison.OrdinalIgnoreCase))
-        {
-            File.Copy(candidate, destination, overwrite: true);
-        }
-
-        return IsUsableVideo(destination) ? "video.webm" : Path.GetFileName(candidate);
+        return Directory.Exists(ArtifactDirectory)
+            ? Directory.GetFiles(ArtifactDirectory, "*.webm")
+                .Where(IsUsableCapture)
+                .Select(Path.GetFileName)
+                .FirstOrDefault()
+            : null;
     }
 
-    private static bool IsUsableVideo(string? path) =>
+    private static bool IsUsableCapture(string? path) =>
         !string.IsNullOrWhiteSpace(path) && File.Exists(path) && new FileInfo(path).Length > 0;
-
-    private static string RenderPlayer(PlaywrightWalkthroughManifest manifest)
-    {
-        var frames = string.Join(
-            Environment.NewLine,
-            manifest.Steps.Select(step =>
-                $"<figure><img src=\"{step.FrameFile}\" alt=\"{step.Name}\"/><figcaption>{step.Index}. {step.Name}</figcaption></figure>"));
-        var video = string.IsNullOrWhiteSpace(manifest.VideoFile)
-            ? string.Empty
-            : $"<video controls autoplay muted src=\"{manifest.VideoFile}\"></video>";
-        return
-            $$"""
-            <!doctype html>
-            <html lang="en">
-            <head>
-              <meta charset="utf-8"/>
-              <title>{{manifest.Title}}</title>
-              <style>
-                body { font-family: Segoe UI, sans-serif; margin: 1.5rem; background: #111; color: #eee; }
-                video { width: min(100%, 1440px); display: block; margin-bottom: 1.5rem; }
-                figure { margin: 0 0 1rem; }
-                img { width: min(100%, 1440px); border: 1px solid #333; }
-                figcaption { margin-top: .4rem; color: #bbb; }
-              </style>
-            </head>
-            <body>
-              <h1>{{manifest.Title}}</h1>
-              {{video}}
-              {{frames}}
-            </body>
-            </html>
-            """;
-    }
 }

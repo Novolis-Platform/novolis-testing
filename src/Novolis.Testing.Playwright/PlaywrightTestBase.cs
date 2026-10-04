@@ -6,7 +6,7 @@ namespace Novolis.Testing.Playwright;
 
 /// <summary>
 /// <see cref="PageTest"/> plus per-test walkthrough storage. Inherit as <c>MyTests : PlaywrightTestBase</c>.
-/// TUnit owns the browser; this type records video, frames, and <c>walkthrough.html</c>.
+/// TUnit owns the browser; this type writes step frames and an HTML recording.
 /// </summary>
 public abstract class PlaywrightTestBase : PageTest
 {

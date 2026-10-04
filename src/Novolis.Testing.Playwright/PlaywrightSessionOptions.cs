@@ -6,17 +6,23 @@ public sealed record PlaywrightSessionOptions
     /// <summary>Absolute URL used as Playwright <c>BaseURL</c>.</summary>
     public Uri? BaseUrl { get; init; }
 
-    /// <summary>Directory that receives video, frames, and the walkthrough manifest.</summary>
+    /// <summary>Directory that receives frames and the HTML recording.</summary>
     public string? ArtifactDirectory { get; init; }
 
     /// <summary>When <see langword="true"/>, Chromium runs without a window. Default is headless.</summary>
     public bool Headless { get; init; } = true;
 
-    /// <summary>When <see langword="true"/>, Playwright writes a WebM video. Default is on.</summary>
-    public bool RecordVideo { get; init; } = true;
+    /// <summary>
+    /// When <see langword="true"/>, Playwright also writes a real-time WebM. Off by default — the
+    /// HTML recording (step frames) is the watchable artifact.
+    /// </summary>
+    public bool RecordVideo { get; init; }
 
-    /// <summary>When <see langword="true"/>, Playwright writes a trace zip next to the video.</summary>
+    /// <summary>When <see langword="true"/>, Playwright writes a trace zip next to the recording.</summary>
     public bool RecordTrace { get; init; } = true;
+
+    /// <summary>How long the HTML recording holds each frame, in milliseconds.</summary>
+    public int FrameHoldMilliseconds { get; init; } = PlaywrightWalkthroughPlayer.DefaultFrameHoldMilliseconds;
 
     /// <summary>Context viewport width in CSS pixels.</summary>
     public int ViewportWidth { get; init; } = 1440;

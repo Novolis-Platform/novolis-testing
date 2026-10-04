@@ -5,12 +5,13 @@ namespace Novolis.Testing.Unit;
 public sealed class PlaywrightSessionOptionsTests
 {
     [Test]
-    public async Task Defaults_record_video_and_run_headless()
+    public async Task Defaults_run_headless_and_hold_recording_frames()
     {
         var options = new PlaywrightSessionOptions();
         await Assert.That(options.Headless).IsTrue();
-        await Assert.That(options.RecordVideo).IsTrue();
+        await Assert.That(options.RecordVideo).IsFalse();
         await Assert.That(options.RecordTrace).IsTrue();
+        await Assert.That(options.FrameHoldMilliseconds).IsEqualTo(4000);
         await Assert.That(options.ViewportWidth).IsEqualTo(1440);
         await Assert.That(options.ViewportHeight).IsEqualTo(900);
     }
