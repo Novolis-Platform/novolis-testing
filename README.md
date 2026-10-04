@@ -42,6 +42,7 @@
 | Package | Install | Package README |
 |---------|---------|----------------|
 | `Novolis.Testing.Appium` | `dotnet add package Novolis.Testing.Appium` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.Appium/README.md) |
+| `Novolis.Testing.Playwright` | `dotnet add package Novolis.Testing.Playwright` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.Playwright/README.md) |
 | `Novolis.Testing.Budgets` | `dotnet add package Novolis.Testing.Budgets` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.Budgets/README.md) |
 | `Novolis.Testing.Coverage` | `dotnet add package Novolis.Testing.Coverage` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.Coverage/README.md) |
 | `Novolis.Testing.Logging` | `dotnet add package Novolis.Testing.Logging` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.Logging/README.md) |
@@ -71,6 +72,7 @@ TUnit-first test helpers for Novolis library development.
 | `Novolis.Testing.TestServer` | In-process test server helpers |
 | `Novolis.Testing.ServiceBus` | AlmostServiceBus TUnit host (Novolis Service Bus Client) |
 | `Novolis.Testing.Appium` | TUnit Appium sessions for Android and Windows MAUI hosts |
+| `Novolis.Testing.Playwright` | Walkthrough video, frames, and HTML on `TUnit.Playwright` `PageTest` |
 
 ## Install
 

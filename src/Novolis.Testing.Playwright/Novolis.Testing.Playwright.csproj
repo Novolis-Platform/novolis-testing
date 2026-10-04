@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Novolis.Testing.Playwright</PackageId>
+    <Description>Walkthrough video, frames, and HTML on top of TUnit.Playwright PageTest.</Description>
+    <IsPackable>true</IsPackable>
+    <OutputType>Library</OutputType>
+    <IsTestProject>false</IsTestProject>
+    <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
+    <RootNamespace>Novolis.Testing.Playwright</RootNamespace>
+    <PackageTags>novolis;testing;playwright;tunit;video</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="TUnit.Playwright" />
+  </ItemGroup>
+</Project>

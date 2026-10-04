@@ -9,6 +9,7 @@ Published docs: [https://novolis-platform.github.io/.github/novolis-testing/](ht
 ## Packages
 
 - `Novolis.Testing.Appium`
+- `Novolis.Testing.Playwright`
 - `Novolis.Testing.Coverage`
 - `Novolis.Testing.Logging`
 - `Novolis.Testing.ServiceBus`
