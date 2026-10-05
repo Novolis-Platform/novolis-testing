@@ -8,8 +8,8 @@
 
 Walkthrough storage on top of **[TUnit.Playwright](https://www.nuget.org/packages/TUnit.Playwright)** `PageTest`. TUnit owns the browser lifecycle. This package writes a readable **story** of each test:
 
-- `walkthrough.md` — Markdown story (open in any editor; frames sit next to the narration)
-- `walkthrough.html` — the same pages as a static document, with Play / Next
+- `walkthrough.md` — Markdown story for editors and LLMs (frames sit next to the narration)
+- `walkthrough.html` — the same pages as a player: steps on the left, one frame that updates on the right
 - `index.md` / `index.html` — collection of the latest recording of each scenario
 - `frames/NN-step.png` — one full-page shot per `StepAsync`
 - `walkthrough.json` — part + step timeline

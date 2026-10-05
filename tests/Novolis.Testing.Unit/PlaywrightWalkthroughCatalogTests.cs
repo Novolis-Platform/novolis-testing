@@ -32,14 +32,20 @@ public sealed class PlaywrightWalkthroughCatalogTests
         await Assert.That(html).Contains("Game shop");
         await Assert.That(html).Contains($"href=\"{newerRelative}/walkthrough.html\"");
         await Assert.That(html).Contains("Each walkthrough.html is one portable file");
+        await Assert.That(html).Contains("class=\"scenario\"");
+        await Assert.That(html).Contains("class=\"markdown\"");
+        await Assert.That(html).Contains($"{newerRelative}/walkthrough.md");
         await Assert.That(html).DoesNotContain("id=\"hoursgamemonthscenariotests-game-shop\"");
         await Assert.That(html).DoesNotContain("data:image/png");
         await Assert.That(html).DoesNotContain("Set Saturday as a working day");
         await Assert.That(player).Contains("Set Saturday as a working day");
         await Assert.That(player).Contains("data:image/png;base64,");
         await Assert.That(player).Contains("Play scenario");
+        await Assert.That(player).Contains("class=\"viewport\"");
         await Assert.That(story).Contains("Set Saturday as a working day");
         await Assert.That(File.Exists(Path.Combine(newer, "walkthrough.html"))).IsTrue();
+        await Assert.That(Directory.Exists(newer)).IsTrue();
+        await Assert.That(Directory.Exists(older)).IsFalse();
     }
 
     private static void Write(string directory, string title, string stepName, DateTimeOffset capturedAt, bool withFrame = false)

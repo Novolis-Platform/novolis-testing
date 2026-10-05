@@ -20,7 +20,6 @@ public sealed class PlaywrightWalkthroughPlayerTests
     {
         var html = PlaywrightWalkthroughPlayer.Render(PlaywrightWalkthroughDoorSample.Create());
 
-        await Assert.That(html).Contains("Read down the page, or use Play / Next.");
         await Assert.That(html).Contains("1 sections · 2 steps");
         await Assert.That(html).Contains("The week is behind the door.");
         await Assert.That(html).Contains("Hours door");
@@ -28,6 +27,9 @@ public sealed class PlaywrightWalkthroughPlayerTests
         await Assert.That(html).Contains("<a href=\"#step-1\">Open door</a>");
         await Assert.That(html).Contains("<details class=\"section\" open><summary>1. Sign in</summary>");
         await Assert.That(html).Contains("<details class=\"section\" open><summary>Set usual hours</summary>");
+        await Assert.That(html).Contains("class=\"step is-current\" id=\"step-1\"");
+        await Assert.That(html).Contains("class=\"viewport\"");
+        await Assert.That(html).Contains("href=\"walkthrough.md\"");
         await Assert.That(html).Contains("src=\"frames/01-Open_door.png\"");
         await Assert.That(html).DoesNotContain("text-transform: uppercase");
         await Assert.That(html).DoesNotContain("<video autoplay");
@@ -43,6 +45,7 @@ public sealed class PlaywrightWalkthroughPlayerTests
 
         await Assert.That(html).Contains("data:image/png;base64,");
         await Assert.That(html).Contains("All walkthroughs");
+        await Assert.That(html).Contains("href=\"walkthrough.md\"");
         await Assert.That(html).DoesNotContain("src=\"frames/01-Open_door.png\"");
     }
 

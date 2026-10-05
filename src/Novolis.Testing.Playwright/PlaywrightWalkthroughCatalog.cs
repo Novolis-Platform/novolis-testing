@@ -120,6 +120,9 @@ public static class PlaywrightWalkthroughCatalog
             .OrderBy(entry => entry.ClassName, StringComparer.OrdinalIgnoreCase)
             .ThenBy(entry => entry.Title, StringComparer.OrdinalIgnoreCase)
             .ToArray();
+        PlaywrightArtifactStore.PruneOlderRecordings(
+            root,
+            entries.Select(entry => Path.GetFullPath(Path.Combine(root, entry.RelativeDirectory))).ToArray());
         File.WriteAllText(Path.Combine(root, MarkdownFileName), RenderMarkdown(entries));
         File.WriteAllText(Path.Combine(root, HtmlFileName), RenderHtml(entries));
         return entries;
@@ -134,7 +137,7 @@ public static class PlaywrightWalkthroughCatalog
         var text = new StringBuilder();
         text.AppendLine("# Walkthroughs");
         text.AppendLine();
-        text.AppendLine("Latest recording of each scenario. Markdown is the story. Each walkthrough.html is one portable file.");
+        text.AppendLine("Latest recording of each scenario. walkthrough.md is the LLM-readable story. walkthrough.html is the player.");
         text.AppendLine();
         if (entries.Count == 0)
         {
@@ -153,10 +156,8 @@ public static class PlaywrightWalkthroughCatalog
                 lastClass = entry.ClassName;
             }
 
-            var md = $"{entry.RelativeDirectory}/walkthrough.md";
-            var html = $"{entry.RelativeDirectory}/walkthrough.html";
             text.AppendLine(
-                $"- [{entry.Title}]({md}) · [Play]({html}) · {entry.PartCount} sections · {entry.StepCount} steps");
+                $"- [{entry.Title}]({entry.MarkdownHref}) · [Play]({entry.HtmlHref}) · {entry.PartCount} sections · {entry.StepCount} steps");
         }
 
         text.AppendLine();
@@ -169,12 +170,10 @@ public static class PlaywrightWalkthroughCatalog
     public static string RenderHtml(IReadOnlyList<PlaywrightWalkthroughCatalogEntry> entries)
     {
         ArgumentNullException.ThrowIfNull(entries);
-        var body = new StringBuilder();
-        body.AppendLine("<h1>Walkthroughs</h1>");
-        body.AppendLine("<p>Each walkthrough.html is one portable file. Screenshots travel inside it. This index only lists the books.</p>");
+        var nav = new StringBuilder();
         if (entries.Count == 0)
         {
-            body.AppendLine("<p>No walkthroughs have been written yet.</p>");
+            nav.AppendLine("<p class=\"meta\">No walkthroughs have been written yet.</p>");
         }
         else
         {
@@ -185,30 +184,32 @@ public static class PlaywrightWalkthroughCatalog
                 {
                     if (lastClass is not null)
                     {
-                        body.AppendLine("</ul>");
+                        nav.AppendLine("</ul></li>");
                     }
 
-                    body.Append("<h2>")
+                    nav.Append("<li class=\"suite\"><h2>")
                         .Append(Encode(PlaywrightWalkthroughTitle.FromTypeName(entry.ClassName)))
-                        .AppendLine("</h2>");
-                    body.AppendLine("<ul>");
+                        .AppendLine("</h2><ul>");
                     lastClass = entry.ClassName;
                 }
 
-                body.Append("<li><a href=\"")
+                nav.Append("<li><a class=\"scenario\" href=\"")
                     .Append(Encode(entry.HtmlHref))
                     .Append("\">")
+                    .Append("<span class=\"title\">")
                     .Append(Encode(entry.Title))
-                    .Append("</a> · ")
+                    .Append("</span><span class=\"meta\">")
                     .Append(entry.PartCount.ToString(CultureInfo.InvariantCulture))
                     .Append(" sections · ")
                     .Append(entry.StepCount.ToString(CultureInfo.InvariantCulture))
-                    .AppendLine(" steps</li>");
+                    .Append(" steps</span></a><a class=\"markdown\" href=\"")
+                    .Append(Encode(entry.MarkdownHref))
+                    .AppendLine("\">Markdown</a></li>");
             }
 
             if (lastClass is not null)
             {
-                body.AppendLine("</ul>");
+                nav.AppendLine("</ul></li>");
             }
         }
 
@@ -220,22 +221,73 @@ public static class PlaywrightWalkthroughCatalog
               <meta name="viewport" content="width=device-width, initial-scale=1"/>
               <title>Walkthroughs</title>
               <style>
-                body { font-family: Georgia, "Times New Roman", serif; margin: 0 auto; max-width: 52rem; padding: 2rem 1.25rem 4rem; line-height: 1.5; color: #1a1a1a; background: #f7f4ee; }
-                h1, h2 { font-family: Segoe UI, sans-serif; font-weight: 650; line-height: 1.3; }
-                h1 { font-size: 1.8rem; }
-                h2 { font-size: 1.2rem; margin-top: 1.75rem; }
-                a { color: #1d4b6e; }
-                ul { padding-left: 1.25rem; }
-                li { margin: .45rem 0; overflow-wrap: break-word; }
-                .meta { color: #4a4a4a; }
+                :root {
+                  --bg: #010D18;
+                  --surface: #051730;
+                  --raised: #072041;
+                  --border: #093D6F;
+                  --text: #E6FBFF;
+                  --muted: #2AA5FF;
+                  --accent: #2FDFFF;
+                  --fill: #237CFF;
+                  --on-fill: #EFFDFF;
+                }
+                * { box-sizing: border-box; }
+                html, body { height: 100%; margin: 0; }
+                body { font-family: "Segoe UI", sans-serif; color: var(--text); background: var(--bg); }
+                .layout { display: grid; grid-template-columns: minmax(18rem, 26rem) 1fr; height: 100vh; }
+                @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+                aside { background: var(--surface); border-right: 1px solid var(--border); padding: 1rem .9rem 1.5rem; overflow: auto; }
+                main { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; padding: 2rem 2.5rem; }
+                h1 { font-size: 1.8rem; font-weight: 650; margin: 0 0 .45rem; }
+                h2 { font-size: .95rem; font-weight: 650; margin: .85rem 0 .35rem; color: var(--accent); }
+                .lede, .meta { color: var(--muted); }
+                .lede { margin: 0 0 1rem; max-width: 36rem; }
+                .catalog { list-style: none; margin: 0; padding: 0; }
+                .catalog ul { list-style: none; margin: 0; padding: 0; }
+                .catalog li { position: relative; }
+                .scenario { display: block; padding: .55rem .65rem; margin: .2rem 0; color: var(--text); text-decoration: none; border-left: 3px solid transparent; }
+                .scenario:hover, .scenario:focus-visible { background: var(--raised); border-left-color: var(--accent); }
+                .scenario .title { display: block; font-weight: 650; overflow-wrap: break-word; }
+                .scenario .meta { display: block; font-size: .85rem; margin-top: .15rem; }
+                .markdown { display: inline-block; margin: 0 0 .45rem .65rem; color: var(--muted); font-size: .85rem; }
+                .stage { flex: 1; width: 100%; min-height: 12rem; border: 1px solid var(--border); background: #000; }
               </style>
             </head>
             <body>
-            __BODY__
+              <div class="layout">
+                <aside>
+                  <p class="meta">Recordings</p>
+                  <ul class="catalog">
+            __NAV__
+                  </ul>
+                </aside>
+                <main>
+                  <h1>Walkthroughs</h1>
+                  <p class="lede">Open a recording from the list — steps stay on the left, the frame updates on the right. Each walkthrough.html is one portable file. walkthrough.md is a separate Markdown story for editors and LLMs.</p>
+                  <div class="stage" aria-hidden="true"></div>
+                </main>
+              </div>
+              <script>
+                function fileHref(href) {
+                  try {
+                    return new URL(href, location.href).href.replace(/^(file:\/\/\/[A-Za-z])%3A/i, "$1:");
+                  } catch { return href; }
+                }
+                document.querySelectorAll("a.scenario, a.markdown").forEach((link) => {
+                  link.setAttribute("href", fileHref(link.getAttribute("href")));
+                  if (location.protocol !== "file:") return;
+                  link.addEventListener("click", (event) => {
+                    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+                    event.preventDefault();
+                    location.assign(link.href);
+                  });
+                });
+              </script>
             </body>
             </html>
             """;
-        return template.Replace("__BODY__", body.ToString(), StringComparison.Ordinal);
+        return template.Replace("__NAV__", nav.ToString(), StringComparison.Ordinal);
     }
 
     private static string ReadShared(string path)

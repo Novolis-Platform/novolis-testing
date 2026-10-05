@@ -42,6 +42,22 @@ public sealed class PlaywrightArtifactStoreTests
     }
 
     [Test]
+    public async Task ForCurrentTest_clears_previous_stamps_for_the_same_identity()
+    {
+        var root = Path.Combine(Path.GetTempPath(), "novolis-playwright-clean", Guid.NewGuid().ToString("N"));
+        var first = PlaywrightArtifactStore.ForCurrentTest("same_identity", root);
+        await File.WriteAllTextAsync(Path.Combine(first, "old.txt"), "gone");
+        var other = PlaywrightArtifactStore.ForCurrentTest("other_identity", root);
+        await File.WriteAllTextAsync(Path.Combine(other, "keep.txt"), "stay");
+
+        var second = PlaywrightArtifactStore.ForCurrentTest("same_identity", root);
+
+        await Assert.That(File.Exists(Path.Combine(first, "old.txt"))).IsFalse();
+        await Assert.That(Directory.Exists(Path.Combine(second, "frames"))).IsTrue();
+        await Assert.That(File.Exists(Path.Combine(other, "keep.txt"))).IsTrue();
+    }
+
+    [Test]
     public async Task CatalogRootFrom_walks_up_to_the_playwright_folder()
     {
         var stamp = Path.Combine(

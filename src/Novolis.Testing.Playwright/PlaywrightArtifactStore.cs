@@ -71,6 +71,7 @@ public static class PlaywrightArtifactStore
 
     /// <summary>
     /// Builds a unique folder for the current TUnit test, or <paramref name="testName"/> when supplied.
+    /// Previous stamp folders for the same class and test name are removed first.
     /// </summary>
     /// <param name="testName">Optional test identity. When omitted, TUnit <see cref="TestContext"/> is used.</param>
     /// <param name="explicitRoot">Optional artifact root override.</param>
@@ -80,11 +81,94 @@ public static class PlaywrightArtifactStore
         var metadata = TestContext.Current?.Metadata;
         var className = Sanitize(metadata?.TestDetails.ClassType.Name ?? "Tests");
         var name = Sanitize(testName ?? metadata?.TestName ?? "anonymous");
+        var identity = Path.Combine(ResolveRoot(explicitRoot), className, name);
+        CleanIdentity(identity);
         var stamp = DateTime.UtcNow.ToString("yyyyMMddTHHmmssfff");
-        var directory = Path.Combine(ResolveRoot(explicitRoot), className, name, stamp);
+        var directory = Path.Combine(identity, stamp);
         Directory.CreateDirectory(directory);
         Directory.CreateDirectory(Path.Combine(directory, "frames"));
         return directory;
+    }
+
+    /// <summary>
+    /// Deletes stamp folders under one test identity (<c>{root}/{class}/{test}</c>)
+    /// so a re-run keeps a single recording.
+    /// </summary>
+    /// <param name="identityDirectory">Class and test folder, not the stamp.</param>
+    public static void CleanIdentity(string identityDirectory)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(identityDirectory);
+        if (!Directory.Exists(identityDirectory))
+        {
+            return;
+        }
+
+        foreach (var child in Directory.GetDirectories(identityDirectory))
+        {
+            TryDeleteDirectory(child);
+        }
+
+        foreach (var file in Directory.GetFiles(identityDirectory))
+        {
+            try
+            {
+                File.Delete(file);
+            }
+            catch (IOException)
+            {
+            }
+            catch (UnauthorizedAccessException)
+            {
+            }
+        }
+    }
+
+    /// <summary>
+    /// Keeps the latest completed recording per test and deletes older stamp folders.
+    /// In-progress folders without <c>walkthrough.json</c> are left alone.
+    /// </summary>
+    /// <param name="root">Playwright artifact root.</param>
+    /// <param name="keep">Absolute stamp folders that must stay.</param>
+    public static void PruneOlderRecordings(string root, IReadOnlyCollection<string> keep)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(root);
+        ArgumentNullException.ThrowIfNull(keep);
+        if (!Directory.Exists(root))
+        {
+            return;
+        }
+
+        var retained = new HashSet<string>(
+            keep.Select(Path.GetFullPath),
+            StringComparer.OrdinalIgnoreCase);
+        foreach (var jsonPath in Directory.EnumerateFiles(root, "walkthrough.json", SearchOption.AllDirectories))
+        {
+            var directory = Path.GetDirectoryName(jsonPath);
+            if (string.IsNullOrWhiteSpace(directory))
+            {
+                continue;
+            }
+
+            var full = Path.GetFullPath(directory);
+            if (!retained.Contains(full))
+            {
+                TryDeleteDirectory(full);
+            }
+        }
+    }
+
+    private static void TryDeleteDirectory(string path)
+    {
+        try
+        {
+            Directory.Delete(path, recursive: true);
+        }
+        catch (IOException)
+        {
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
     }
 
     /// <summary>Replaces characters that cannot appear in a file name on Windows or Linux.</summary>

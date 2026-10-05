@@ -13,4 +13,7 @@ public sealed record PlaywrightWalkthroughCatalogEntry(
 {
     /// <summary>Relative path from the catalog root to this recording's portable HTML.</summary>
     public string HtmlHref => RelativeDirectory.Replace('\\', '/') + "/walkthrough.html";
+
+    /// <summary>Relative path from the catalog root to this recording's Markdown story.</summary>
+    public string MarkdownHref => RelativeDirectory.Replace('\\', '/') + "/walkthrough.md";
 }

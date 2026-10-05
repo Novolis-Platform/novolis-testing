@@ -2,7 +2,7 @@ using System.Text;
 
 namespace Novolis.Testing.Playwright;
 
-/// <summary>Writes a walkthrough as Markdown so the story opens in any editor.</summary>
+/// <summary>Writes a walkthrough as Markdown — a separate file for editors and LLMs.</summary>
 public static class PlaywrightWalkthroughMarkdown
 {
     /// <summary>Renders one scenario as a readable Markdown document with frames.</summary>
