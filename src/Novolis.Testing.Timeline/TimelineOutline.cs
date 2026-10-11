@@ -1,12 +1,10 @@
-namespace Novolis.Testing.Playwright;
+namespace Novolis.Testing.Timeline;
 
-/// <summary>Turns a flat step list into an infinitely nestable section outline.</summary>
-public static class PlaywrightWalkthroughOutline
+/// <summary>Builds a nestable outline from timeline frame section paths.</summary>
+public static class TimelineOutline
 {
-    /// <summary>Section headings from the root, empty string meaning indent only.</summary>
-    /// <param name="step">Captured step.</param>
-    /// <returns>Root-first path.</returns>
-    public static IReadOnlyList<string> PathOf(PlaywrightWalkthroughStep step)
+    /// <summary>Returns the root-first section path for a frame.</summary>
+    public static IReadOnlyList<string> PathOf(TimelineStep step)
     {
         ArgumentNullException.ThrowIfNull(step);
         if (step.Sections is { Count: > 0 })
@@ -15,8 +13,8 @@ public static class PlaywrightWalkthroughOutline
         }
 
         var path = new List<string>();
-        if (!string.IsNullOrWhiteSpace(step.Part) &&
-            !step.Part.Equals("Scenario", StringComparison.Ordinal))
+        if (!string.IsNullOrWhiteSpace(step.Part)
+            && !step.Part.Equals("Scenario", StringComparison.Ordinal))
         {
             path.Add(step.Part);
         }
@@ -35,10 +33,8 @@ public static class PlaywrightWalkthroughOutline
         return path;
     }
 
-    /// <summary>Named top-level sections in a scenario.</summary>
-    /// <param name="steps">Captured steps.</param>
-    /// <returns>Count of distinct first headings.</returns>
-    public static int SectionCount(IEnumerable<PlaywrightWalkthroughStep> steps)
+    /// <summary>Counts distinct named top-level sections.</summary>
+    public static int SectionCount(IEnumerable<TimelineStep> steps)
     {
         ArgumentNullException.ThrowIfNull(steps);
         return steps
@@ -49,14 +45,12 @@ public static class PlaywrightWalkthroughOutline
             .Count();
     }
 
-    /// <summary>Walks opens, steps, and closes so a renderer can nest lists.</summary>
-    /// <param name="steps">Captured steps in order.</param>
-    /// <returns>Outline operations.</returns>
-    public static IReadOnlyList<PlaywrightWalkthroughOutlineOp> Build(
-        IReadOnlyList<PlaywrightWalkthroughStep> steps)
+    /// <summary>Builds open, close, and frame operations for a renderer.</summary>
+    public static IReadOnlyList<TimelineOutlineOp> Build(
+        IReadOnlyList<TimelineStep> steps)
     {
         ArgumentNullException.ThrowIfNull(steps);
-        var ops = new List<PlaywrightWalkthroughOutlineOp>();
+        var operations = new List<TimelineOutlineOp>();
         var current = new List<string>();
         foreach (var step in steps)
         {
@@ -64,7 +58,7 @@ public static class PlaywrightWalkthroughOutline
             var shared = SharedPrefix(current, target);
             while (current.Count > shared)
             {
-                ops.Add(new PlaywrightWalkthroughOutlineOp(
+                operations.Add(new TimelineOutlineOp(
                     "close",
                     current.Count,
                     current[^1],
@@ -77,25 +71,25 @@ public static class PlaywrightWalkthroughOutline
             {
                 var heading = target[current.Count];
                 current.Add(heading);
-                ops.Add(new PlaywrightWalkthroughOutlineOp(
+                operations.Add(new TimelineOutlineOp(
                     "open",
                     current.Count,
                     heading,
-                    current.Count == target.Count ? step.Kind ?? string.Empty : string.Empty,
+                    current.Count == target.Count ? step.Kind : string.Empty,
                     null));
             }
 
-            ops.Add(new PlaywrightWalkthroughOutlineOp(
+            operations.Add(new TimelineOutlineOp(
                 "step",
                 current.Count,
                 string.Empty,
-                step.Kind ?? string.Empty,
+                step.Kind,
                 step));
         }
 
         while (current.Count > 0)
         {
-            ops.Add(new PlaywrightWalkthroughOutlineOp(
+            operations.Add(new TimelineOutlineOp(
                 "close",
                 current.Count,
                 current[^1],
@@ -104,15 +98,17 @@ public static class PlaywrightWalkthroughOutline
             current.RemoveAt(current.Count - 1);
         }
 
-        return ops;
+        return operations;
     }
 
-    private static int SharedPrefix(IReadOnlyList<string> left, IReadOnlyList<string> right)
+    private static int SharedPrefix(
+        IReadOnlyList<string> left,
+        IReadOnlyList<string> right)
     {
         var count = Math.Min(left.Count, right.Count);
         var shared = 0;
-        while (shared < count &&
-               string.Equals(left[shared], right[shared], StringComparison.Ordinal))
+        while (shared < count
+            && string.Equals(left[shared], right[shared], StringComparison.Ordinal))
         {
             shared++;
         }

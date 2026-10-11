@@ -1,15 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>Novolis.Testing.Appium</PackageId>
-    <Description>TUnit Appium session helpers for Android and Windows MAUI hosts.</Description>
+    <Description>TUnit Appium sessions for Android and Windows MAUI hosts, with per-test timeline frames and HTML evidence.</Description>
     <IsPackable>true</IsPackable>
     <OutputType>Library</OutputType>
     <IsTestProject>false</IsTestProject>
     <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
     <RootNamespace>Novolis.Testing.Appium</RootNamespace>
-    <PackageTags>novolis;testing;appium;maui;tunit</PackageTags>
+    <PackageTags>novolis;testing;appium;maui;tunit;timeline</PackageTags>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Novolis.Testing.Timeline\Novolis.Testing.Timeline.csproj" />
     <PackageReference Include="Appium.WebDriver" />
     <PackageReference Include="TUnit" />
   </ItemGroup>

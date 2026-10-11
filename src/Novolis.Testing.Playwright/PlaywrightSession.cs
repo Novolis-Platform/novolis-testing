@@ -1,27 +1,20 @@
-using System.Text.Json;
 using Microsoft.Playwright;
+using Novolis.Testing.Timeline;
 
 namespace Novolis.Testing.Playwright;
 
 /// <summary>
-/// Walkthrough recorder for a page owned by <c>TUnit.Playwright.PageTest</c>.
+/// Timeline recorder for a page owned by <c>TUnit.Playwright.PageTest</c>.
 /// Does not launch Chromium — TUnit does that.
 /// </summary>
 public sealed class PlaywrightSession
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-    };
-
-    private readonly List<PlaywrightWalkthroughStep> steps = [];
-    private readonly Stack<(string Heading, PlaywrightWalkthroughFlowKind Kind)> sections = new();
+    private readonly TimelineRecorder timeline;
     private readonly PlaywrightSessionOptions options;
 
     /// <summary>Attaches to a TUnit-owned page.</summary>
     /// <param name="page">Page from <c>PageTest.Page</c>.</param>
-    /// <param name="options">Walkthrough and artifact options.</param>
+    /// <param name="options">Timeline and artifact options.</param>
     public PlaywrightSession(IPage page, PlaywrightSessionOptions? options = null)
     {
         ArgumentNullException.ThrowIfNull(page);
@@ -30,60 +23,42 @@ public sealed class PlaywrightSession
         ArtifactDirectory = string.IsNullOrWhiteSpace(this.options.ArtifactDirectory)
             ? PlaywrightArtifactStore.ForCurrentTest()
             : this.options.ArtifactDirectory;
-        Directory.CreateDirectory(ArtifactDirectory);
-        Directory.CreateDirectory(Path.Combine(ArtifactDirectory, "frames"));
+        timeline = TimelineRecorder.Open(
+            ArtifactDirectory,
+            this.options.TimelineTitle,
+            new TimelineRecorderOptions
+            {
+                BaseUrl = this.options.BaseUrl?.AbsoluteUri,
+                FrameHoldMilliseconds = this.options.FrameHoldMilliseconds,
+                LogFileName = "timeline.log",
+            });
     }
 
     /// <summary>Active page for the test.</summary>
     public IPage Page { get; }
 
-    /// <summary>Folder that receives frames and the walkthrough recording.</summary>
+    /// <summary>Folder that receives frames and the timeline recording.</summary>
     public string ArtifactDirectory { get; }
 
-    /// <summary>Absolute walkthrough JSON path after <see cref="FlushAsync"/>.</summary>
-    public string ManifestPath => Path.Combine(ArtifactDirectory, "walkthrough.json");
+    /// <summary>Absolute timeline JSON path after <see cref="FlushAsync"/>.</summary>
+    public string TimelinePath => Path.Combine(ArtifactDirectory, "timeline.json");
 
     /// <summary>Absolute HTML document path after <see cref="FlushAsync"/>.</summary>
-    public string PlayerPath => Path.Combine(ArtifactDirectory, "walkthrough.html");
+    public string HtmlPath => Path.Combine(ArtifactDirectory, "timeline.html");
 
     /// <summary>Absolute Markdown story path after <see cref="FlushAsync"/>.</summary>
-    public string MarkdownPath => Path.Combine(ArtifactDirectory, "walkthrough.md");
+    public string MarkdownPath => Path.Combine(ArtifactDirectory, "timeline.md");
 
-    /// <summary>Recorded steps captured so far.</summary>
-    public IReadOnlyList<PlaywrightWalkthroughStep> Steps => steps;
+    /// <summary>Recorded timeline frames captured so far.</summary>
+    public IReadOnlyList<TimelineStep> Steps => timeline.Steps;
 
     /// <summary>Outermost named section, or <c>Scenario</c> when none is open.</summary>
-    public string CurrentPart =>
-        CurrentSections.FirstOrDefault(heading => !string.IsNullOrWhiteSpace(heading)) ?? "Scenario";
-
-    private IReadOnlyList<string> CurrentSections =>
-        sections.Reverse().Select(section => section.Heading).ToArray();
-
-    private string CurrentFlowName =>
-        CurrentSections.LastOrDefault(heading => !string.IsNullOrWhiteSpace(heading)) ?? string.Empty;
-
-    private string CurrentFlowPath =>
-        string.Join(" · ", CurrentSections.Where(heading => !string.IsNullOrWhiteSpace(heading)));
-
-    private string CurrentKindWire =>
-        sections.Count == 0
-            ? string.Empty
-            : sections.Peek().Kind switch
-            {
-                PlaywrightWalkthroughFlowKind.Planned => "planned",
-                PlaywrightWalkthroughFlowKind.Deviated => "deviated",
-                PlaywrightWalkthroughFlowKind.Closed => "closed",
-                _ => string.Empty,
-            };
+    public string CurrentPart => timeline.CurrentPart;
 
     /// <summary>Opens a top-level section. Later <see cref="BeginPart"/> calls replace it.</summary>
     /// <param name="name">Section heading.</param>
     public void BeginPart(string name)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        sections.Clear();
-        sections.Push((name, PlaywrightWalkthroughFlowKind.Default));
-    }
+        => timeline.BeginPart(name);
 
     /// <summary>
     /// Opens a nestable section. A heading plus indent, or indent only when
@@ -92,31 +67,22 @@ public sealed class PlaywrightSession
     /// <param name="heading">Section title. Null or blank is a sectionless indent.</param>
     /// <param name="kind">Optional kind inherited by steps in this nest.</param>
     /// <returns>Scope that pops the section when disposed.</returns>
-    public PlaywrightWalkthroughFlow BeginSection(
+    public TimelineScope BeginSection(
         string? heading = null,
-        PlaywrightWalkthroughFlowKind kind = PlaywrightWalkthroughFlowKind.Default)
-    {
-        sections.Push((heading ?? string.Empty, kind));
-        return new PlaywrightWalkthroughFlow(() =>
-        {
-            if (sections.Count > 0)
-            {
-                sections.Pop();
-            }
-        });
-    }
+        TimelineFlowKind kind = TimelineFlowKind.Default) =>
+        timeline.BeginSection(heading, kind);
 
     /// <summary>Opens a named nested section. Prefer <see cref="BeginSection"/>.</summary>
     /// <param name="name">Section heading.</param>
     /// <param name="kind">Optional kind inherited by steps in this nest.</param>
     /// <returns>Scope that pops the section when disposed.</returns>
-    public PlaywrightWalkthroughFlow BeginFlow(
+    public TimelineScope BeginFlow(
         string name,
-        PlaywrightWalkthroughFlowKind kind = PlaywrightWalkthroughFlowKind.Default) =>
-        BeginSection(name, kind);
+        TimelineFlowKind kind = TimelineFlowKind.Default) =>
+        timeline.BeginFlow(name, kind);
 
     /// <summary>
-    /// Runs one named walkthrough step, then stores a PNG frame so the HTML player can replay it.
+    /// Runs one named timeline step, then stores a PNG frame so the HTML player can replay it.
     /// </summary>
     /// <param name="name">Human-readable step title.</param>
     /// <param name="action">Work performed on <see cref="Page"/>.</param>
@@ -135,7 +101,7 @@ public sealed class PlaywrightSession
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentNullException.ThrowIfNull(action);
-        await action(Page);
+        await action(Page).ConfigureAwait(false);
         await CaptureAsync(name, narration);
     }
 
@@ -151,30 +117,19 @@ public sealed class PlaywrightSession
     public async Task CaptureAsync(string name, string narration)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        var index = steps.Count + 1;
-        var fileName = $"{index:00}-{PlaywrightArtifactStore.Sanitize(name)}.png";
-        var path = Path.Combine(ArtifactDirectory, "frames", fileName);
-        await Page.ScreenshotAsync(new PageScreenshotOptions
-        {
-            Path = path,
-            FullPage = true,
-        });
-        steps.Add(new PlaywrightWalkthroughStep(
-            index,
-            CurrentPart,
-            name,
-            narration ?? string.Empty,
-            $"frames/{fileName}",
-            DateTimeOffset.UtcNow,
-            sections.Count,
-            CurrentFlowName,
-            CurrentFlowPath,
-            CurrentKindWire,
-            CurrentSections));
+        await timeline.CaptureAsync(
+                name,
+                narration ?? string.Empty,
+                path => Page.ScreenshotAsync(new PageScreenshotOptions
+                {
+                    Path = path,
+                    FullPage = true,
+                }))
+            .ConfigureAwait(false);
     }
 
     /// <summary>
-    /// Writes the walkthrough JSON and HTML recording. Optionally notes a raw WebM when one exists.
+    /// Writes the timeline JSON, Markdown, and HTML recording. Optionally notes a raw WebM when one exists.
     /// Does not close the TUnit browser context.
     /// </summary>
     /// <returns>A task that completes when artifacts are flushed.</returns>
@@ -184,31 +139,11 @@ public sealed class PlaywrightSession
         var traceFile = File.Exists(Path.Combine(ArtifactDirectory, "trace.zip"))
             ? "trace.zip"
             : null;
-        var manifest = new PlaywrightWalkthroughManifest(
-            options.WalkthroughTitle,
-            options.BaseUrl?.AbsoluteUri,
-            ArtifactDirectory,
-            rawCapture,
-            traceFile,
-            options.FrameHoldMilliseconds,
-            steps);
+        timeline.SetRawCapture(rawCapture);
+        timeline.SetTrace(traceFile);
+        await timeline.FlushAsync().ConfigureAwait(false);
         var catalogRoot = PlaywrightArtifactStore.CatalogRootFrom(ArtifactDirectory);
-        var indexHref = Path.GetRelativePath(ArtifactDirectory, Path.Combine(catalogRoot, PlaywrightWalkthroughCatalog.MarkdownFileName))
-            .Replace('\\', '/');
-        var htmlIndexHref = Path.GetRelativePath(ArtifactDirectory, Path.Combine(catalogRoot, PlaywrightWalkthroughCatalog.HtmlFileName))
-            .Replace('\\', '/');
-        PlaywrightWalkthroughCatalog.Synchronize(() =>
-        {
-            File.WriteAllText(ManifestPath, JsonSerializer.Serialize(manifest, JsonOptions));
-            File.WriteAllText(MarkdownPath, PlaywrightWalkthroughMarkdown.Render(manifest, indexHref));
-            File.WriteAllText(
-                PlayerPath,
-                PlaywrightWalkthroughPlayer.Render(
-                    manifest,
-                    htmlIndexHref,
-                    relative => PlaywrightWalkthroughAssets.ToDataUriOrPath(ArtifactDirectory, relative)));
-            PlaywrightWalkthroughCatalog.Refresh(catalogRoot);
-        });
+        TimelineCatalog.Refresh(catalogRoot);
     }
 
     private async Task<string?> CopyRawCaptureAsync()

@@ -46,6 +46,7 @@
 | `Novolis.Testing.Budgets` | `dotnet add package Novolis.Testing.Budgets` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.Budgets/README.md) |
 | `Novolis.Testing.Coverage` | `dotnet add package Novolis.Testing.Coverage` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.Coverage/README.md) |
 | `Novolis.Testing.Logging` | `dotnet add package Novolis.Testing.Logging` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.Logging/README.md) |
+| `Novolis.Testing.Timeline` | `dotnet add package Novolis.Testing.Timeline` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.Timeline/README.md) |
 | `Novolis.Testing.ServiceBus` | `dotnet add package Novolis.Testing.ServiceBus` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.ServiceBus/README.md) |
 | `Novolis.Testing.TestBases` | `dotnet add package Novolis.Testing.TestBases` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.TestBases/README.md) |
 | `Novolis.Testing.Testcontainers` | `dotnet add package Novolis.Testing.Testcontainers` | [README](https://github.com/Novolis-Platform/novolis-testing/blob/main/src/Novolis.Testing.Testcontainers/README.md) |
@@ -71,8 +72,9 @@ TUnit-first test helpers for Novolis library development.
 | `Novolis.Testing.Testcontainers` | Testcontainers integration |
 | `Novolis.Testing.TestServer` | In-process test server helpers |
 | `Novolis.Testing.ServiceBus` | AlmostServiceBus TUnit host (Novolis Service Bus Client) |
-| `Novolis.Testing.Appium` | TUnit Appium sessions for Android and Windows MAUI hosts |
-| `Novolis.Testing.Playwright` | HTML step recording (frames + `walkthrough.html`) on `TUnit.Playwright` `PageTest` |
+| `Novolis.Testing.Appium` | TUnit Appium sessions for Android and Windows MAUI hosts, with per-test timeline frames |
+| `Novolis.Testing.Timeline` | Framework-neutral frames, events, telemetry, logs, and HTML evidence |
+| `Novolis.Testing.Playwright` | Browser timeline adapter (frames + `timeline.html`) on `TUnit.Playwright` `PageTest` |
 
 ## Install
 

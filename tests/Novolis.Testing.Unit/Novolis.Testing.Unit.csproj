@@ -20,6 +20,7 @@
     <ProjectReference Include="..\..\src\Novolis.Testing.ServiceBus\Novolis.Testing.ServiceBus.csproj" />
     <ProjectReference Include="..\..\src\Novolis.Testing.TestBases\Novolis.Testing.TestBases.csproj" />
     <ProjectReference Include="..\..\src\Novolis.Testing.TestServer\Novolis.Testing.TestServer.csproj" />
+    <ProjectReference Include="..\..\src\Novolis.Testing.Timeline\Novolis.Testing.Timeline.csproj" />
     <ProjectReference Include="..\..\src\Novolis.Testing.TUnit\Novolis.Testing.TUnit.csproj" />
     <ProjectReference Include="..\..\src\Novolis.Testing.Coverage\Novolis.Testing.Coverage.csproj" />
     <LibraryReference Include="Novolis.CodeGen.Reflection.Dump" />

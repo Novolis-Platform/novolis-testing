@@ -1,9 +1,10 @@
 using TUnit.Core;
+using Novolis.Testing.Timeline;
 
 namespace Novolis.Testing.Playwright;
 
 /// <summary>
-/// Resolves a writable folder for Playwright videos, screenshot frames, and walkthrough manifests.
+/// Resolves a writable folder for Playwright videos, screenshot frames, and timeline manifests.
 /// </summary>
 public static class PlaywrightArtifactStore
 {
@@ -123,40 +124,6 @@ public static class PlaywrightArtifactStore
         }
     }
 
-    /// <summary>
-    /// Keeps the latest completed recording per test and deletes older stamp folders.
-    /// In-progress folders without <c>walkthrough.json</c> are left alone.
-    /// </summary>
-    /// <param name="root">Playwright artifact root.</param>
-    /// <param name="keep">Absolute stamp folders that must stay.</param>
-    public static void PruneOlderRecordings(string root, IReadOnlyCollection<string> keep)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(root);
-        ArgumentNullException.ThrowIfNull(keep);
-        if (!Directory.Exists(root))
-        {
-            return;
-        }
-
-        var retained = new HashSet<string>(
-            keep.Select(Path.GetFullPath),
-            StringComparer.OrdinalIgnoreCase);
-        foreach (var jsonPath in Directory.EnumerateFiles(root, "walkthrough.json", SearchOption.AllDirectories))
-        {
-            var directory = Path.GetDirectoryName(jsonPath);
-            if (string.IsNullOrWhiteSpace(directory))
-            {
-                continue;
-            }
-
-            var full = Path.GetFullPath(directory);
-            if (!retained.Contains(full))
-            {
-                TryDeleteDirectory(full);
-            }
-        }
-    }
-
     private static void TryDeleteDirectory(string path)
     {
         try
@@ -169,6 +136,24 @@ public static class PlaywrightArtifactStore
         catch (UnauthorizedAccessException)
         {
         }
+    }
+
+    /// <summary>
+    /// Keeps the latest completed recording per test and deletes older stamp folders.
+    /// In-progress folders without <c>timeline.json</c> are left alone.
+    /// </summary>
+    /// <param name="root">Playwright artifact root.</param>
+    /// <param name="keep">Absolute stamp folders that must stay.</param>
+    public static void PruneOlderRecordings(string root, IReadOnlyCollection<string> keep)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(root);
+        ArgumentNullException.ThrowIfNull(keep);
+        if (!Directory.Exists(root))
+        {
+            return;
+        }
+
+        TimelineCatalog.PruneOlderRecordings(root, keep);
     }
 
     /// <summary>Replaces characters that cannot appear in a file name on Windows or Linux.</summary>

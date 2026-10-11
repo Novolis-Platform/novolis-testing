@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>Novolis.Testing.Timeline</PackageId>
+    <Description>Framework-neutral evidence timelines with portable frames, events, telemetry, logs, Markdown, and HTML output.</Description>
+    <IsPackable>true</IsPackable>
+    <OutputType>Library</OutputType>
+    <IsTestProject>false</IsTestProject>
+    <IsTestingPlatformApplication>false</IsTestingPlatformApplication>
+    <RootNamespace>Novolis.Testing.Timeline</RootNamespace>
+    <PackageTags>novolis;testing;timeline;evidence;appium;playwright;tunit</PackageTags>
+  </PropertyGroup>
+</Project>

@@ -1,13 +1,13 @@
-using Novolis.Testing.Playwright;
+using Novolis.Testing.Timeline;
 
 namespace Novolis.Testing.Unit;
 
-public sealed class PlaywrightWalkthroughCatalogTests
+public sealed class TimelineCatalogTests
 {
     [Test]
     public async Task Refresh_rewrites_stories_and_indexes_the_latest_of_each_test()
     {
-        var root = Path.Combine(Path.GetTempPath(), "novolis-walkthrough-index", Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(Path.GetTempPath(), "novolis-timeline-index", Guid.NewGuid().ToString("N"));
         var older = Path.Combine(root, "HoursGameMonthScenarioTests", "Game_shop", "20260101T000000000");
         var newer = Path.Combine(root, "HoursGameMonthScenarioTests", "Game_shop", "20261004T190000000");
         var other = Path.Combine(root, "HoursMixedRoleTests", "Helen_is_hr_and_admin", "20261004T193000000");
@@ -15,35 +15,33 @@ public sealed class PlaywrightWalkthroughCatalogTests
         Write(newer, "Game_shop", "Set Saturday as a working day", DateTimeOffset.Parse("2026-10-04T19:00:00Z"), withFrame: true);
         Write(other, "Helen_is_hr_and_admin", "Open Rules", DateTimeOffset.Parse("2026-10-04T19:30:00Z"));
 
-        var entries = PlaywrightWalkthroughCatalog.Refresh(root);
+        var entries = TimelineCatalog.Refresh(root);
         var index = await File.ReadAllTextAsync(Path.Combine(root, "index.md"));
         var html = await File.ReadAllTextAsync(Path.Combine(root, "index.html"));
-        var story = await File.ReadAllTextAsync(Path.Combine(newer, "walkthrough.md"));
-        var player = await File.ReadAllTextAsync(Path.Combine(newer, "walkthrough.html"));
+        var story = await File.ReadAllTextAsync(Path.Combine(newer, "timeline.md"));
+        var player = await File.ReadAllTextAsync(Path.Combine(newer, "timeline.html"));
         var newerRelative = Path.GetRelativePath(root, newer).Replace('\\', '/');
 
         await Assert.That(entries).Count().IsEqualTo(2);
-        await Assert.That(index).Contains("# Walkthroughs");
+        await Assert.That(index).Contains("# Timelines");
         await Assert.That(index).Contains("## Hours Game Month Scenario Tests");
         await Assert.That(index).Contains("[Game shop](");
-        await Assert.That(index).Contains("walkthrough.md");
+        await Assert.That(index).Contains("timeline.md");
         await Assert.That(index).Contains("[Play](");
         await Assert.That(index).DoesNotContain("20260101T000000000");
         await Assert.That(html).Contains("Game shop");
-        await Assert.That(html).Contains($"href=\"{newerRelative}/walkthrough.html\"");
-        await Assert.That(html).Contains("Each walkthrough.html is one portable file");
-        await Assert.That(html).Contains("class=\"scenario\"");
-        await Assert.That(html).Contains("class=\"markdown\"");
-        await Assert.That(html).Contains($"{newerRelative}/walkthrough.md");
+        await Assert.That(html).Contains($"href=\"{newerRelative}/timeline.html\"");
+        await Assert.That(html).Contains("Latest image-backed evidence recordings");
+        await Assert.That(html).Contains($"{newerRelative}/timeline.md");
         await Assert.That(html).DoesNotContain("id=\"hoursgamemonthscenariotests-game-shop\"");
         await Assert.That(html).DoesNotContain("data:image/png");
         await Assert.That(html).DoesNotContain("Set Saturday as a working day");
         await Assert.That(player).Contains("Set Saturday as a working day");
         await Assert.That(player).Contains("data:image/png;base64,");
-        await Assert.That(player).Contains("Play scenario");
+        await Assert.That(player).Contains("Play timeline");
         await Assert.That(player).Contains("class=\"viewport\"");
         await Assert.That(story).Contains("Set Saturday as a working day");
-        await Assert.That(File.Exists(Path.Combine(newer, "walkthrough.html"))).IsTrue();
+        await Assert.That(File.Exists(Path.Combine(newer, "timeline.html"))).IsTrue();
         await Assert.That(Directory.Exists(newer)).IsTrue();
         await Assert.That(Directory.Exists(older)).IsFalse();
     }
@@ -66,7 +64,7 @@ public sealed class PlaywrightWalkthroughCatalogTests
                 ]);
         }
 
-        var manifest = new PlaywrightWalkthroughManifest(
+        var manifest = new TimelineManifest(
             title,
             null,
             directory,
@@ -74,11 +72,18 @@ public sealed class PlaywrightWalkthroughCatalogTests
             TraceFile: null,
             FrameHoldMilliseconds: 4000,
             [
-                new PlaywrightWalkthroughStep(1, "1. Shop", stepName, "Narration.", "frames/01.png", capturedAt),
-            ]);
+                new TimelineStep(1, "1. Shop", stepName, "Narration.", "frames/01.png", capturedAt),
+            ],
+            "timeline.log");
+        var document = new TimelineDocument(
+            "novolis.testing.timeline/v1",
+            capturedAt,
+            manifest,
+            [],
+            []);
         File.WriteAllText(
-            Path.Combine(directory, "walkthrough.json"),
-            System.Text.Json.JsonSerializer.Serialize(manifest, new System.Text.Json.JsonSerializerOptions
+            Path.Combine(directory, "timeline.json"),
+            System.Text.Json.JsonSerializer.Serialize(document, new System.Text.Json.JsonSerializerOptions
             {
                 PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
             }));

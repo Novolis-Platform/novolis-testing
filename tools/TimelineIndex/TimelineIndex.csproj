@@ -7,9 +7,10 @@
     <EnableMicrosoftTestingPlatform>false</EnableMicrosoftTestingPlatform>
     <GenerateTestingPlatformEntryPoint>false</GenerateTestingPlatformEntryPoint>
     <TestingPlatformDotnetTestSupport>false</TestingPlatformDotnetTestSupport>
-    <RootNamespace>Novolis.Testing.WalkthroughIndex</RootNamespace>
+    <RootNamespace>Novolis.Testing.TimelineIndex</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Novolis.Testing.Timeline\Novolis.Testing.Timeline.csproj" />
     <ProjectReference Include="..\..\src\Novolis.Testing.Playwright\Novolis.Testing.Playwright.csproj" />
   </ItemGroup>
 </Project>

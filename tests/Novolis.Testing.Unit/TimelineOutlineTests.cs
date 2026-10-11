@@ -1,13 +1,13 @@
-using Novolis.Testing.Playwright;
+using Novolis.Testing.Timeline;
 
 namespace Novolis.Testing.Unit;
 
-public sealed class PlaywrightWalkthroughOutlineTests
+public sealed class TimelineOutlineTests
 {
     [Test]
     public async Task Build_nests_sections_and_sectionless_indents()
     {
-        var ops = PlaywrightWalkthroughOutline.Build(
+        var ops = TimelineOutline.Build(
         [
             Step(1, "Sign in", ["Robin registers the month"]),
             Step(2, "Open My hours", ["Robin registers the month", "Set usual hours"]),
@@ -21,7 +21,7 @@ public sealed class PlaywrightWalkthroughOutlineTests
             .IsEqualTo(3);
     }
 
-    private static PlaywrightWalkthroughStep Step(int index, string name, IReadOnlyList<string> sections) =>
+    private static TimelineStep Step(int index, string name, IReadOnlyList<string> sections) =>
         new(
             index,
             sections[0],

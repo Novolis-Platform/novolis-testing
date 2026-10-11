@@ -1,7 +1,7 @@
-namespace Novolis.Testing.Playwright;
+namespace Novolis.Testing.Timeline;
 
-/// <summary>One captured step inside a scenario, nested in zero or more sections.</summary>
-public sealed record PlaywrightWalkthroughStep(
+/// <summary>One image-backed state in an evidence timeline.</summary>
+public sealed record TimelineStep(
     int Index,
     string Part,
     string Name,

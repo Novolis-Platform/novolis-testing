@@ -1,3 +1,5 @@
+using Novolis.Testing.Timeline;
+
 namespace Novolis.Testing.Playwright;
 
 /// <summary>Launch and recording options for one Playwright browser session.</summary>
@@ -6,7 +8,7 @@ public sealed record PlaywrightSessionOptions
     /// <summary>Absolute URL used as Playwright <c>BaseURL</c>.</summary>
     public Uri? BaseUrl { get; init; }
 
-    /// <summary>Directory that receives frames and the HTML recording.</summary>
+    /// <summary>Directory that receives frames and the HTML timeline.</summary>
     public string? ArtifactDirectory { get; init; }
 
     /// <summary>When <see langword="true"/>, Chromium runs without a window. Default is headless.</summary>
@@ -21,8 +23,8 @@ public sealed record PlaywrightSessionOptions
     /// <summary>When <see langword="true"/>, Playwright writes a trace zip next to the recording.</summary>
     public bool RecordTrace { get; init; } = true;
 
-    /// <summary>How long the HTML recording holds each frame, in milliseconds.</summary>
-    public int FrameHoldMilliseconds { get; init; } = PlaywrightWalkthroughPlayer.DefaultFrameHoldMilliseconds;
+    /// <summary>How long the HTML timeline holds each frame, in milliseconds.</summary>
+    public int FrameHoldMilliseconds { get; init; } = TimelineRecorder.DefaultFrameHoldMilliseconds;
 
     /// <summary>Context viewport width in CSS pixels.</summary>
     public int ViewportWidth { get; init; } = 1440;
@@ -30,8 +32,22 @@ public sealed record PlaywrightSessionOptions
     /// <summary>Context viewport height in CSS pixels.</summary>
     public int ViewportHeight { get; init; } = 900;
 
-    /// <summary>Walkthrough title stored in the manifest.</summary>
-    public string WalkthroughTitle { get; init; } = "Playwright walkthrough";
+    private string timelineTitle = "Playwright timeline";
+
+    /// <summary>Timeline title stored in the manifest.</summary>
+    public string TimelineTitle
+    {
+        get => timelineTitle;
+        init => timelineTitle = value;
+    }
+
+    /// <summary>Compatibility alias for the pre-timeline option name.</summary>
+    [Obsolete("Use TimelineTitle.")]
+    public string WalkthroughTitle
+    {
+        get => timelineTitle;
+        init => timelineTitle = value;
+    }
 
     /// <summary>
     /// Resolves headed vs headless. <c>NOVOLIS_PLAYWRIGHT_HEADED=1</c> forces a visible browser.

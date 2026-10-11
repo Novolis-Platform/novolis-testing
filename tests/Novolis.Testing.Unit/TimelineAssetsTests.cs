@@ -1,8 +1,8 @@
-using Novolis.Testing.Playwright;
+using Novolis.Testing.Timeline;
 
 namespace Novolis.Testing.Unit;
 
-public sealed class PlaywrightWalkthroughAssetsTests
+public sealed class TimelineAssetsTests
 {
     private static readonly byte[] OnePixelPng =
     [
@@ -16,12 +16,12 @@ public sealed class PlaywrightWalkthroughAssetsTests
     [Test]
     public async Task ToDataUri_reads_png_as_image_png()
     {
-        var root = Path.Combine(Path.GetTempPath(), "novolis-walkthrough-assets", Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(Path.GetTempPath(), "novolis-timeline-assets", Guid.NewGuid().ToString("N"));
         var frames = Path.Combine(root, "frames");
         Directory.CreateDirectory(frames);
         await File.WriteAllBytesAsync(Path.Combine(frames, "01.png"), OnePixelPng);
 
-        var uri = PlaywrightWalkthroughAssets.ToDataUri(root, "frames/01.png");
+        var uri = TimelineAssets.ToDataUri(root, "frames/01.png");
 
         await Assert.That(uri).StartsWith("data:image/png;base64,");
         await Assert.That(Convert.FromBase64String(uri["data:image/png;base64,".Length..])).IsEquivalentTo(OnePixelPng);
@@ -30,10 +30,10 @@ public sealed class PlaywrightWalkthroughAssetsTests
     [Test]
     public async Task ToDataUriOrPath_keeps_missing_frames_as_paths()
     {
-        var root = Path.Combine(Path.GetTempPath(), "novolis-walkthrough-assets", Guid.NewGuid().ToString("N"));
+        var root = Path.Combine(Path.GetTempPath(), "novolis-timeline-assets", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root);
 
-        await Assert.That(PlaywrightWalkthroughAssets.ToDataUriOrPath(root, "frames/01.png"))
+        await Assert.That(TimelineAssets.ToDataUriOrPath(root, "frames/01.png"))
             .IsEqualTo("frames/01.png");
     }
 }

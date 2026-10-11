@@ -1,11 +1,12 @@
 using Microsoft.Playwright;
+using Novolis.Testing.Timeline;
 using TUnit.Core;
 using TUnit.Playwright;
 
 namespace Novolis.Testing.Playwright;
 
 /// <summary>
-/// <see cref="PageTest"/> plus per-test walkthrough storage. Inherit as <c>MyTests : PlaywrightTestBase</c>.
+/// <see cref="PageTest"/> plus per-test timeline storage. Inherit as <c>MyTests : PlaywrightTestBase</c>.
 /// TUnit owns the browser; this type writes step frames, a Markdown story, and an HTML document.
 /// </summary>
 public abstract class PlaywrightTestBase : PageTest
@@ -22,7 +23,7 @@ public abstract class PlaywrightTestBase : PageTest
     {
     }
 
-    /// <summary>Walkthrough attached after TUnit creates <see cref="PageTest.Page"/>.</summary>
+    /// <summary>Timeline attached after TUnit creates <see cref="PageTest.Page"/>.</summary>
     protected PlaywrightSession Session { get; private set; } = null!;
 
     /// <summary>Builds launch options for this test. Override to set <see cref="PlaywrightSessionOptions.BaseUrl"/>.</summary>
@@ -30,7 +31,7 @@ public abstract class PlaywrightTestBase : PageTest
     protected virtual PlaywrightSessionOptions CreateOptions() => new()
     {
         ArtifactDirectory = PlaywrightArtifactStore.ForCurrentTest(),
-        WalkthroughTitle = PlaywrightWalkthroughTitle.Display(
+        TimelineTitle = TimelineTitle.Display(
             TestContext.Current?.Metadata.TestName ?? GetType().Name),
     };
 
@@ -64,9 +65,9 @@ public abstract class PlaywrightTestBase : PageTest
     }
 
     /// <summary>Ensures Chromium is present and starts an optional trace.</summary>
-    /// <returns>A task that completes when the walkthrough is attached.</returns>
+    /// <returns>A task that completes when the timeline is attached.</returns>
     [Before(HookType.Test, Order = 10)]
-    public async Task AttachWalkthroughAsync()
+    public async Task AttachTimelineAsync()
     {
         if (!PlaywrightBrowserInstaller.EnsureChromium())
         {
@@ -101,10 +102,10 @@ public abstract class PlaywrightTestBase : PageTest
         }
     }
 
-    /// <summary>Writes frames and the HTML player. Video may still be finalizing.</summary>
+    /// <summary>Writes frames and the HTML timeline. Video may still be finalizing.</summary>
     /// <returns>A task that completes when artifacts are flushed.</returns>
     [After(HookType.Test, Order = 10)]
-    public async Task FlushWalkthroughAsync()
+    public async Task FlushTimelineAsync()
     {
         if (Session is not null)
         {

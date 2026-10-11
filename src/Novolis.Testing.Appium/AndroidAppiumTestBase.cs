@@ -1,13 +1,15 @@
+using OpenQA.Selenium.Appium;
 using OpenQA.Selenium.Appium.Android;
 using TUnit.Core;
 
 namespace Novolis.Testing.Appium;
 
 /// <summary>
-/// Class-scoped Android Appium fixture. Inherit as <c>MyTests : AndroidAppiumTestBase&lt;MyTests&gt;</c>.
+/// Class-scoped Android Appium fixture with a per-test evidence timeline.
+/// Inherit as <c>MyTests : AndroidAppiumTestBase&lt;MyTests&gt;</c>.
 /// </summary>
 /// <typeparam name="TSelf">The concrete test class.</typeparam>
-public abstract class AndroidAppiumTestBase<TSelf>
+public abstract class AndroidAppiumTestBase<TSelf> : AppiumTimelineTestBase
     where TSelf : AndroidAppiumTestBase<TSelf>, new()
 {
     private static AndroidAppiumSession? s_session;
@@ -18,6 +20,9 @@ public abstract class AndroidAppiumTestBase<TSelf>
 
     /// <summary>Driver for the class-scoped session.</summary>
     protected static AndroidDriver Driver => Session.Driver;
+
+    /// <inheritdoc />
+    protected override AppiumDriver TimelineDriver => Driver;
 
     /// <summary>Builds session capabilities for this test class.</summary>
     /// <returns>Android session options.</returns>

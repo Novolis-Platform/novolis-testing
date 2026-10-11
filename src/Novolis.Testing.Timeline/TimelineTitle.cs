@@ -1,13 +1,11 @@
 using System.Text;
 
-namespace Novolis.Testing.Playwright;
+namespace Novolis.Testing.Timeline;
 
-/// <summary>Turns test and type identifiers into titles a person can read.</summary>
-public static class PlaywrightWalkthroughTitle
+/// <summary>Turns test and type identifiers into readable timeline titles.</summary>
+public static class TimelineTitle
 {
     /// <summary>Replaces underscores with spaces.</summary>
-    /// <param name="value">Test method name or folder segment.</param>
-    /// <returns>A sentence-like title.</returns>
     public static string FromTestName(string value)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(value);
@@ -21,8 +19,6 @@ public static class PlaywrightWalkthroughTitle
     }
 
     /// <summary>Inserts spaces before capitals in a type name.</summary>
-    /// <param name="value">Class name such as <c>HoursGameMonthScenarioTests</c>.</param>
-    /// <returns>A spaced heading.</returns>
     public static string FromTypeName(string value)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(value);
@@ -46,14 +42,12 @@ public static class PlaywrightWalkthroughTitle
         return text.ToString();
     }
 
-    /// <summary>Uses the stored title, or turns a test identifier into words.</summary>
-    /// <param name="title">Manifest title, which may still be a method name.</param>
-    /// <returns>Display title.</returns>
+    /// <summary>Uses a stored title, or turns a test identifier into words.</summary>
     public static string Display(string? title)
     {
         if (string.IsNullOrWhiteSpace(title))
         {
-            return "Walkthrough";
+            return "Timeline";
         }
 
         return title.Contains('_', StringComparison.Ordinal)

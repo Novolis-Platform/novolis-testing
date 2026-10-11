@@ -1,4 +1,4 @@
-using Novolis.Testing.Playwright;
+using Novolis.Testing.Timeline;
 
 namespace Novolis.Testing.Unit;
 
@@ -6,10 +6,10 @@ namespace Novolis.Testing.Unit;
 /// In-code door scenario used by player tests.
 /// Built so <c>DumpVar</c> can emit a C# initializer from a live instance.
 /// </summary>
-internal static class PlaywrightWalkthroughDoorSample
+internal static class TimelineDoorSample
 {
     /// <summary>Scenario, section, nested section, two steps.</summary>
-    public static PlaywrightWalkthroughManifest Create() =>
+    public static TimelineManifest Create() =>
         new(
             "Hours door",
             "http://localhost:1/",
@@ -18,7 +18,7 @@ internal static class PlaywrightWalkthroughDoorSample
             TraceFile: null,
             FrameHoldMilliseconds: 4000,
             [
-                new PlaywrightWalkthroughStep(
+                new TimelineStep(
                     1,
                     "1. Sign in",
                     "Open door",
@@ -30,7 +30,7 @@ internal static class PlaywrightWalkthroughDoorSample
                     FlowPath: "1. Sign in",
                     Kind: "",
                     Sections: ["1. Sign in"]),
-                new PlaywrightWalkthroughStep(
+                new TimelineStep(
                     2,
                     "1. Sign in",
                     "Open My hours",
@@ -42,5 +42,6 @@ internal static class PlaywrightWalkthroughDoorSample
                     FlowPath: "1. Sign in · Set usual hours",
                     Kind: "",
                     Sections: ["1. Sign in", "Set usual hours"]),
-            ]);
+            ],
+            "timeline.log");
 }

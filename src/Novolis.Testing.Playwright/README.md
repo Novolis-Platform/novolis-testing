@@ -6,13 +6,13 @@
 
 # Novolis.Testing.Playwright
 
-Walkthrough storage on top of **[TUnit.Playwright](https://www.nuget.org/packages/TUnit.Playwright)** `PageTest`. TUnit owns the browser lifecycle. This package writes a readable **story** of each test:
+Timeline capture on top of **[TUnit.Playwright](https://www.nuget.org/packages/TUnit.Playwright)** `PageTest`. TUnit owns the browser lifecycle. This package supplies the browser adapter while the framework-neutral timeline package writes a readable **story** of each test:
 
-- `walkthrough.md` — Markdown story for editors and LLMs (frames sit next to the narration)
-- `walkthrough.html` — the same pages as a player: steps on the left, one frame that updates on the right
+- `timeline.md` — Markdown story for editors and LLMs (frames sit next to the narration)
+- `timeline.html` — the same pages as a player: steps on the left, one frame that updates on the right
 - `index.md` / `index.html` — collection of the latest recording of each scenario
 - `frames/NN-step.png` — one full-page shot per `StepAsync`
-- `walkthrough.json` — part + step timeline
+- `timeline.json` — sections, frames, events, telemetry, and artifact links
 - `trace.zip` — Playwright trace (optional, on by default)
 
 Real-time WebM is off by default. Playwright finishes a UI test in seconds, so a `<video>` of that run is unreadable. Set `RecordVideo = true` only if you want the raw capture tucked under “Raw capture” in the player.
@@ -32,6 +32,7 @@ dotnet add package Novolis.Testing.Playwright
 ```csharp
 using Microsoft.Playwright;
 using Novolis.Testing.Playwright;
+using Novolis.Testing.Timeline;
 using TUnit.Core;
 
 public sealed class DoorTests : PlaywrightTestBase
@@ -40,7 +41,7 @@ public sealed class DoorTests : PlaywrightTestBase
     {
         BaseUrl = new Uri("http://localhost:5731/"),
         ArtifactDirectory = PlaywrightArtifactStore.ForCurrentTest(),
-        WalkthroughTitle = "Hours door",
+        TimelineTitle = "Hours door",
     };
 
     [Test]
@@ -59,9 +60,9 @@ public sealed class DoorTests : PlaywrightTestBase
             });
         }
 
-        using (Session.BeginFlow("Thursday · Changed", PlaywrightWalkthroughFlowKind.Deviated))
+        using (Session.BeginFlow("Thursday · Changed", TimelineFlowKind.Deviated))
         {
-            using (Session.BeginFlow("I worked different hours", PlaywrightWalkthroughFlowKind.Deviated))
+            using (Session.BeginFlow("I worked different hours", TimelineFlowKind.Deviated))
             {
                 await Session.StepAsync("Type 10:00–18:00", "Late, same length.", async page =>
                 {
@@ -74,14 +75,14 @@ public sealed class DoorTests : PlaywrightTestBase
 }
 ```
 
-After the test, open `walkthrough.md` to read, or `index.html` at the artifact root to jump between scenarios.
+After the test, open `timeline.md` to read, or `index.html` at the artifact root to jump between scenarios.
 
 ## Related packages
 
 | Package | When to use |
 |---------|-------------|
 | `TUnit.Playwright` | Browser lifecycle (`PageTest`, `[RecordVideo]`) — this package sits on it |
-| `Novolis.Testing.Appium` | Android / Windows MAUI hosts |
+| `Novolis.Testing.Appium` | Android / Windows MAUI hosts, same timeline shape |
 | `Novolis.Testing.TUnit` | JSON/table dump helpers for assertions |
 | `Novolis.Testing.TestServer` | In-process HTTP (not a real browser) |
 

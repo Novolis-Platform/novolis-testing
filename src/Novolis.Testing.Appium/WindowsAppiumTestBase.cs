@@ -1,13 +1,15 @@
+using OpenQA.Selenium.Appium;
 using OpenQA.Selenium.Appium.Windows;
 using TUnit.Core;
 
 namespace Novolis.Testing.Appium;
 
 /// <summary>
-/// Class-scoped Windows Appium fixture. Inherit as <c>MyTests : WindowsAppiumTestBase&lt;MyTests&gt;</c>.
+/// Class-scoped Windows Appium fixture with a per-test evidence timeline.
+/// Inherit as <c>MyTests : WindowsAppiumTestBase&lt;MyTests&gt;</c>.
 /// </summary>
 /// <typeparam name="TSelf">The concrete test class.</typeparam>
-public abstract class WindowsAppiumTestBase<TSelf>
+public abstract class WindowsAppiumTestBase<TSelf> : AppiumTimelineTestBase
     where TSelf : WindowsAppiumTestBase<TSelf>, new()
 {
     private static WindowsAppiumSession? s_session;
@@ -18,6 +20,9 @@ public abstract class WindowsAppiumTestBase<TSelf>
 
     /// <summary>Driver for the class-scoped session.</summary>
     protected static WindowsDriver Driver => Session.Driver;
+
+    /// <inheritdoc />
+    protected override AppiumDriver TimelineDriver => Driver;
 
     /// <summary>Builds session capabilities for this test class.</summary>
     /// <returns>Windows session options.</returns>

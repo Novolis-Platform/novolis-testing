@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>Novolis.Testing.Playwright</PackageId>
-    <Description>Walkthrough JSON and frames as source, a portable walkthrough.html as the compiled artifact, and a lightweight catalog on top of TUnit.Playwright PageTest.</Description>
+    <Description>Timeline JSON, frames, and portable evidence artifacts on top of TUnit.Playwright PageTest.</Description>
     <IsPackable>true</IsPackable>
     <OutputType>Library</OutputType>
     <IsTestProject>false</IsTestProject>
@@ -10,6 +10,7 @@
     <PackageTags>novolis;testing;playwright;tunit;video</PackageTags>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Novolis.Testing.Timeline\Novolis.Testing.Timeline.csproj" />
     <PackageReference Include="TUnit.Playwright" />
   </ItemGroup>
 </Project>
