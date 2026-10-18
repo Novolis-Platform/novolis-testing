@@ -17,6 +17,12 @@ drivers, or deterministic fixtures. It writes:
 - `frames/` — captured images
 - `logs/` — event NDJSON and the recorder log
 
+## Install
+
+```xml
+<PackageReference Include="Novolis.Testing.Timeline" Version="2026.1.*" />
+```
+
 ## Quick start
 
 ```csharp
